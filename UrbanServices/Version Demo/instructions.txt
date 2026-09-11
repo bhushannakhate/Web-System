@@ -1,0 +1,27 @@
+
+Top view:
+contains: sign in to pinterest, open pinterest, and on the right sign in/log in button
+
+middle view:
+contains: big upload box, under it on the left "audio" on the right "upload"
+
+bottom
+contain information about us i guess? for example netflix has:
+Questions? Call 1-844-569-7700 (Toll-Free)
+FAQ
+Help Center
+Netflix House
+Netflix Shop
+Terms of Use
+Privacy
+Cookie Preferences
+Corporate Information
+Do Not Sell or Share My Personal Information
+Ad Choices
+Select language
+
+
+we can keep for now:
+terms of use
+privacy
+FAQ
