@@ -1,13 +1,7 @@
-import './App.css'
-import Home from './pages/Home'
+import ArtworkForm from './components/ArtworkForm'
 
 function App() {
-
-  return (
-    <div>
-      <Home />
-    </div>
-  )
+  return <ArtworkForm />
 }
 
 export default App
