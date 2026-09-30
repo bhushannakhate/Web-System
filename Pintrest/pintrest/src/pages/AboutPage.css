@@ -1,0 +1,51 @@
+.about-page { margin: 0 auto; max-width: 1240px; padding: 0 6vw; }
+.about-hero { align-items: center; display: grid; gap: 6vw; grid-template-columns: 1fr .9fr; min-height: 515px; padding: 65px 0 72px; }
+.about-hero-copy { max-width: 525px; }
+.about-hero h1 { color: #302d28; font-size: clamp(43px, 6vw, 73px); font-weight: 500; letter-spacing: -.065em; line-height: .99; margin: 0; max-width: 610px; }
+.about-hero h1 em { color: #b25a48; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
+.about-intro { color: #777168; font-size: 14px; line-height: 1.85; margin: 23px 0 26px; max-width: 430px; }
+.about-cta { align-items: center; background: #302d28; border-radius: 3px; color: #fffdf9; display: inline-flex; font-size: 12px; gap: 20px; min-height: 45px; padding: 0 16px; text-decoration: none; transition: background .2s, transform .2s; }
+.about-cta:hover { background: #b25a48; transform: translateY(-2px); }
+.about-art { align-items: center; background: #eee6d9; border-radius: 48% 52% 46% 54% / 53% 46% 54% 47%; display: flex; height: min(34vw, 380px); justify-content: center; justify-self: end; max-height: 380px; max-width: 390px; min-height: 280px; min-width: 280px; overflow: hidden; position: relative; transform: rotate(-5deg); width: 100%; }
+.art-orbit { border: 1px solid rgba(142, 111, 88, .23); border-radius: 50%; height: 74%; position: absolute; transform: rotate(38deg); width: 42%; }
+.art-orbit-one { height: 90%; transform: rotate(53deg); width: 57%; }
+.art-orbit-two { height: 56%; transform: rotate(-42deg); width: 92%; }
+.art-sun { background: #d48a70; border-radius: 50%; height: 46%; position: absolute; right: 16%; top: 13%; width: 46%; }
+.art-card { align-items: center; box-shadow: 0 14px 35px rgba(78, 59, 42, .13); display: flex; flex-direction: column; justify-content: space-between; padding: 14px; position: absolute; transform: rotate(9deg); }
+.art-card-one { background: #fffaf0; height: 172px; left: 15%; top: 27%; width: 126px; }
+.art-card-two { background: #73806b; color: #fffaf0; height: 146px; right: 13%; top: 41%; transform: rotate(-8deg); width: 108px; }
+.art-card span { align-self: flex-start; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: .14em; }
+.art-card b { font-family: Georgia, serif; font-size: 68px; font-weight: 400; line-height: 1; }
+.art-card-two b { font-size: 59px; }
+.art-spark { color: #b25a48; font-size: 24px; position: absolute; }
+.art-spark-one { left: 17%; top: 16%; }
+.art-spark-two { bottom: 14%; right: 20%; }
+.about-principles { border-top: 1px solid #e8e1d7; padding: 60px 0 66px; }
+.section-heading { align-items: flex-end; display: flex; gap: 35px; justify-content: space-between; margin-bottom: 34px; }
+.section-heading .page-eyebrow { flex-shrink: 0; margin: 0 0 6px; }
+.section-heading h2 { color: #302d28; font-size: clamp(23px, 3vw, 32px); font-weight: 500; letter-spacing: -.045em; line-height: 1.2; margin: 0; max-width: 520px; }
+.principle-grid { display: grid; gap: 17px; grid-template-columns: repeat(3, 1fr); }
+.principle-card { background: rgba(255, 253, 249, .72); border: 1px solid #e8e1d7; border-radius: 4px; min-height: 190px; padding: 22px 21px; }
+.principle-number { color: #b25a48; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .08em; }
+.principle-card h3 { color: #39352f; font-size: 16px; font-weight: 600; letter-spacing: -.025em; margin: 25px 0 9px; }
+.principle-card p { color: #817a70; font-size: 12px; line-height: 1.7; margin: 0; max-width: 300px; }
+.about-bottom-cta { align-items: center; border-top: 1px solid #e8e1d7; display: flex; justify-content: space-between; padding: 25px 0 31px; }
+.about-bottom-cta p { color: #817a70; font-size: 12px; margin: 0; }
+.about-bottom-cta a { color: #a45d4c; font-size: 12px; text-decoration-color: #d7b2a4; text-underline-offset: 4px; }
+.about-bottom-cta a span { padding-left: 6px; }
+
+@media (max-width: 760px) {
+  .about-page { padding: 0 22px; }
+  .about-hero { gap: 34px; grid-template-columns: 1fr; padding: 58px 0 55px; }
+  .about-art { height: 320px; justify-self: center; width: min(100%, 360px); }
+  .section-heading { align-items: flex-start; flex-direction: column; gap: 14px; }
+  .principle-grid { grid-template-columns: 1fr; }
+  .principle-card { min-height: auto; }
+  .principle-card h3 { margin-top: 17px; }
+}
+
+@media (max-width: 480px) {
+  .about-hero h1 { font-size: 46px; }
+  .about-art { height: 290px; min-height: 250px; min-width: 250px; }
+  .about-bottom-cta { align-items: flex-start; flex-direction: column; gap: 10px; }
+}
