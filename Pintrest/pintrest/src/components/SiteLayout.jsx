@@ -17,7 +17,7 @@ function SiteLayout() {
             <NavLink to="/" end>Studio</NavLink>
           </nav>
 
-          <NavLink className="header-cta" to="/">Create something <span aria-hidden="true">↗</span></NavLink>
+          <NavLink className="header-cta" to="/login">Sign in/Login</NavLink>
         </div>
       </header>
 
