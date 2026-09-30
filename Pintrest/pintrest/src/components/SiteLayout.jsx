@@ -6,20 +6,25 @@ function SiteLayout() {
     <div className="site-layout">
       <a className="skip-link" href="#main-content">Skip to content</a>
 
-      <header className="site-header">
-        <div className="site-header-inner">
-          <NavLink className="site-brand" to="/" aria-label="Pinboard Studio home">
-            <span className="brand-mark" aria-hidden="true">p</span>
-            <span>pinboard<span className="brand-light"> studio</span></span>
-          </NavLink>
+        <nav>
 
-          <nav className="site-nav" aria-label="Main navigation">
-            <NavLink to="/" end>Studio</NavLink>
-          </nav>
-
-          <NavLink className="header-cta" to="/">Create something <span aria-hidden="true">↗</span></NavLink>
-        </div>
-      </header>
+            <div>
+                <ul id = "navBar">
+                    <li>
+                        <a href={"index.html"}> Home </a>
+                    </li>
+                    <li>
+                        <a href={"index.html"}> About </a>
+                    </li>
+                    <li>
+                        <a href={"index.html"}> Login </a>
+                    </li>
+                    <li>
+                        <a href={"index.html"}> Sign Up </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
 
       <div id="main-content"><Outlet /></div>
 
