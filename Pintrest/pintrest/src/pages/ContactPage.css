@@ -1,0 +1,47 @@
+.contact-page { margin: 0 auto; max-width: 1100px; padding: 0 6vw 74px; }
+.contact-intro { padding: 65px 0 45px; }
+.contact-intro .page-eyebrow { margin-bottom: 17px; }
+.contact-intro h1 { color: #302d28; font-size: clamp(48px, 7vw, 78px); font-weight: 500; letter-spacing: -.07em; line-height: 1; margin: 0; }
+.contact-intro h1 em { color: #b25a48; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
+.contact-intro > p:last-child { color: #777168; font-size: 14px; line-height: 1.75; margin: 19px 0 0; max-width: 520px; }
+.contact-layout { align-items: stretch; background: rgba(255, 253, 249, .75); border: 1px solid #e8e1d7; border-radius: 4px; display: grid; grid-template-columns: .78fr 1.22fr; }
+.contact-aside { background: #f0e9de; border-radius: 4px 0 0 4px; display: flex; flex-direction: column; padding: 34px clamp(24px, 4vw, 43px); }
+.contact-note-mark { align-items: center; background: #b25a48; border-radius: 50%; color: white; display: flex; font-size: 20px; height: 43px; justify-content: center; width: 43px; }
+.contact-aside h2 { color: #39352f; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; font-weight: 400; letter-spacing: -.035em; line-height: 1.2; margin: 27px 0 12px; }
+.contact-aside > p { color: #777168; font-size: 12px; line-height: 1.8; margin: 0; }
+.contact-aside-rule { border-top: 1px solid #d9d0c2; margin: auto 0 19px; padding-top: 20px; }
+.contact-aside-small { color: #777168; font-size: 11px; line-height: 1.8; }
+.contact-aside-small span { color: #a45d4c; display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: .1em; margin-bottom: 8px; }
+.contact-recipient-list { list-style: none; margin: 0; padding: 0; overflow-wrap: anywhere; }
+.contact-recipient-list li + li { margin-top: 4px; }
+.contact-form-wrap { padding: 34px clamp(23px, 4vw, 44px); }
+.contact-form { display: flex; flex-direction: column; gap: 20px; }
+.contact-field-row { display: grid; gap: 17px; grid-template-columns: 1fr 1fr; }
+.contact-field { display: flex; flex-direction: column; gap: 8px; }
+.contact-field label { color: #39352f; font-size: 11px; }
+.contact-field label span { color: #b25a48; }
+.contact-field input, .contact-field select, .contact-field textarea { background: #fffdf9; border: 1px solid #e1dbd1; border-radius: 3px; color: #423e38; font: inherit; font-size: 12px; outline: 0; padding: 12px 13px; transition: border .2s, box-shadow .2s; width: 100%; }
+.contact-field input, .contact-field select { min-height: 43px; }
+.contact-field textarea { line-height: 1.6; resize: vertical; }
+.contact-field input:focus, .contact-field select:focus, .contact-field textarea:focus { border-color: #b25a48; box-shadow: 0 0 0 3px rgba(178, 90, 72, .09); }
+.contact-field input::placeholder, .contact-field textarea::placeholder { color: #aaa198; }
+.contact-form-footer { align-items: center; display: flex; gap: 15px; justify-content: space-between; }
+.contact-form-footer p { color: #918a80; font-size: 10px; line-height: 1.5; margin: 0; }
+.contact-form-footer button { align-items: center; background: #302d28; border: 0; border-radius: 3px; color: #fffdf9; display: inline-flex; flex-shrink: 0; font: inherit; font-size: 11px; gap: 18px; min-height: 42px; padding: 0 14px; transition: background .2s; }
+.contact-form-footer button:hover { background: #b25a48; }
+.contact-confirmation { background: #f1f3e9; border: 1px solid #d9dfc6; border-radius: 3px; color: #596047; font-size: 11px; line-height: 1.5; margin: -6px 0 0; padding: 11px 13px; }
+
+@media (max-width: 720px) {
+  .contact-page { padding: 0 22px 50px; }
+  .contact-intro { padding: 48px 0 32px; }
+  .contact-layout { grid-template-columns: 1fr; }
+  .contact-aside { border-radius: 4px 4px 0 0; }
+  .contact-aside h2 { max-width: 420px; }
+  .contact-aside-rule { margin-top: 25px; }
+}
+
+@media (max-width: 480px) {
+  .contact-field-row { grid-template-columns: 1fr; }
+  .contact-form-footer { align-items: stretch; flex-direction: column; }
+  .contact-form-footer button { justify-content: center; }
+}

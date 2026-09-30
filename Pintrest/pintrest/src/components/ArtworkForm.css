@@ -14,7 +14,7 @@ button, textarea { font: inherit; }
 button { cursor: pointer; }
 button:disabled { cursor: wait; }
 
-.page-shell { align-items: center; display: flex; justify-content: center; min-height: 100vh; padding: 28px 6vw; }
+.page-shell { align-items: center; display: flex; justify-content: center; min-height: calc(100vh - 154px); padding: 28px 6vw; }
 .required-note, .ready-label, .privacy-note, .field-hint, .file-types { color: #918a80; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
 .step-label { color: #b25a48; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: .1em; margin: 0 0 10px; text-transform: uppercase; }
 .creation-card { background: rgba(255, 253, 249, .88); border: 1px solid rgba(73, 65, 55, .13); border-radius: 5px; box-shadow: 0 20px 70px rgba(87, 73, 59, .08); margin: 0 auto; max-width: 840px; padding: 37px clamp(20px, 5vw, 57px) 32px; width: 100%; }
@@ -72,7 +72,7 @@ textarea::placeholder { color: #b6afa5; }
 .pinterest-button:disabled { cursor: default; opacity: .85; }
 
 @media (max-width: 640px) {
-  .page-shell { padding: 22px 18px 20px; }
+  .page-shell { min-height: calc(100vh - 160px); padding: 22px 18px 20px; }
   .creation-card { padding: 28px 18px 24px; }
   .form-heading h2 { font-size: 22px; }
   .upload-grid { grid-template-columns: 1fr; }
