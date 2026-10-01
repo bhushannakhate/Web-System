@@ -25,7 +25,6 @@
 @media (max-width: 700px) {
   .site-header-inner { flex-wrap: wrap; gap: 14px; min-height: 0; padding: 17px 20px; }
   .site-nav { gap: 18px; margin-left: auto; }
-  .header-cta { display: none; }
   .site-footer-inner { align-items: flex-start; flex-direction: column; gap: 12px; padding: 22px 20px; }
 }
 

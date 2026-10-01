@@ -4,7 +4,6 @@ import './SiteLayout.css'
 function SiteLayout() {
   return (
     <div className="site-layout">
-      <a className="skip-link" href="#main-content">Skip to content</a>
 
         <nav>
 
