@@ -34,3 +34,46 @@
   .site-nav { gap: 14px; }
   .site-nav a { font-size: 11px; }
 }
+
+nav{
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  background: rgba(255, 253, 249, .88);
+  padding: 20px 80px;
+  box-shadow: 0 .3px .3px 0 rgba(0, 0, 0, 0.2), 0 .3px .3px 0 rgba(0, 0, 0, 0.19);
+
+}
+#navBar{
+  display: flex;
+  align-items: center;
+  justify-content:center;
+}
+#navBar li {
+  list-style: none;
+  padding: 0 20px;
+  position: relative;
+}
+
+#navBar li a {
+  text-decoration: none;
+  font-size: 1.3rem;
+  font-weight: bold;
+  color: #000;
+  transition: 0.2s;
+}
+
+#navBar li a:hover {
+  color: #be705d;
+}
+
+#navBar li a:hover::after {
+  content: "";
+  width: 30%;
+  height: 2px;
+  background: #be705d;
+  position: absolute;
+  bottom: -4px;
+  left: 20px;
+
+}
