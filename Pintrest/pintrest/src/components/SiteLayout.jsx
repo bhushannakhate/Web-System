@@ -13,13 +13,13 @@ function SiteLayout() {
                         <a href={"index.html"}> Home </a>
                     </li>
                     <li>
-                        <a href={"index.html"}> About </a>
+                        <NavLink to="/about">About</NavLink>
                     </li>
                     <li>
-                        <a href={"index.html"}> Login </a>
+                        <NavLink to="/login">Login</NavLink>
                     </li>
                     <li>
-                        <a href={"index.html"}> Sign Up </a>
+                        <NavLink to="">Pinterest</NavLink>
                     </li>
                 </ul>
             </div>
