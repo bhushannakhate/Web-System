@@ -1,10 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
+import '../styles/ScopedBootstrap.scss'
 import './ArtworkForm.css'
+
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 
 function Icon({ name, size = 20, strokeWidth = 1.8 }) {
   const paths = {
+    // ignore these, these are jus tthe icons for the middle box
     arrow: <><path d="M12 5v14" /><path d="m18 13-6 6-6-6" /></>,
     check: <><path d="m5 12 4.3 4.3L19 6.7" /></>,
     mic: <><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" /></>,
@@ -160,105 +163,135 @@ function ArtworkForm() {
   }
 
   return (
-    <main className="page-shell">
-      <form className="creation-card" onSubmit={handleSubmit} noValidate>
-        <div className="form-heading">
-          <div>
-            <p className="step-label">01 <span>·</span> WEBSITE CS PART 1</p>
-            <h2>What are we cooking?</h2>
-          </div>
-          <span className="required-note">* required</span>
-        </div>
-
-        <div className="upload-grid">
-          <div className="field-block">
-            <div className="field-label-row">
-              <label htmlFor="image-upload">Your image <span>*</span></label>
-              {image && <span className="ready-label"><Icon name="check" size={13} /> ready</span>}
+    <main className="bootstrap-page">
+      <div className="page-shell container-fluid" data-bs-theme="light">
+        <form className="creation-card" onSubmit={handleSubmit} noValidate>
+          <div className="form-heading d-flex flex-wrap gap-2">
+            <div>
+              <p className="step-label">01 <span>·</span> Change your image by uploading or audio</p>
+              <h2>what will you submit to Pinterest?</h2>
             </div>
+            <span className="required-note">* required</span>
+          </div>
 
-            {image ? (
-              <div className="image-preview-card">
-                <img src={image.url} alt={`Preview of ${image.file.name}`} />
-                <div className="image-overlay">
-                  <p>{image.file.name}</p>
-                  <div className="preview-actions">
-                    <button type="button" className="mini-button" onClick={chooseImage}>Replace</button>
-                    <button type="button" className="mini-button mini-button-quiet" onClick={removeImage}>Remove</button>
+          <div className="upload-grid row g-3">
+            <div className="field-block col-12 col-md-6">
+              <div className="field-label-row d-flex flex-wrap gap-2">
+                <label className="form-label" htmlFor="image-upload">Your image <span>*</span></label>
+                {image && <span className="ready-label"><Icon name="check" size={13} /> ready</span>}
+              </div>
+
+              {image ? (
+                <div className="image-preview-card">
+                  <img src={image.url} alt={`Preview of ${image.file.name}`} />
+                  <div className="image-overlay">
+                    <p>{image.file.name}</p>
+                    <div className="preview-actions d-flex flex-wrap gap-2">
+                      <button
+                        className="btn btn-light mini-button"
+                        type="button"
+                        onClick={chooseImage}
+                      >
+                        Replace
+                      </button>
+                      <button
+                        className="btn btn-outline-light mini-button mini-button-quiet"
+                        type="button"
+                        onClick={removeImage}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <button
-                id="image-upload"
-                type="button"
-                className="drop-zone"
-                onClick={chooseImage}
-                onDragOver={(event) => { event.preventDefault(); event.currentTarget.classList.add('is-dragging') }}
-                onDragLeave={(event) => event.currentTarget.classList.remove('is-dragging')}
-                onDrop={handleDrop}
-              >
-                <span className="upload-icon"><Icon name="upload" size={21} /></span>
-                <span className="drop-title">Drop an image here</span>
-                <span className="drop-subtitle">or <u>browse your files</u></span>
-                <span className="file-types">JPG, PNG, WEBP · max 10 MB</span>
-              </button>
-            )}
-            <input ref={fileInputRef} id="file-input" className="visually-hidden" type="file" accept="image/*" onChange={handleFileInput} />
-            {imageError && <p className="error-message" role="alert">{imageError}</p>}
-          </div>
-
-          <div className="field-block prompt-block">
-            <div className="field-label-row">
-              <label htmlFor="prompt">What do you want to change? <span className="optional-label">optional</span></label>
-              <span className="character-count">{prompt.length}/240</span>
+              ) : (
+                <button
+                  id="image-upload"
+                  type="button"
+                  className="btn drop-zone"
+                  onClick={chooseImage}
+                  onDragOver={(event) => { event.preventDefault(); event.currentTarget.classList.add('is-dragging') }}
+                  onDragLeave={(event) => event.currentTarget.classList.remove('is-dragging')}
+                  onDrop={handleDrop}
+                >
+                  <span className="upload-icon"><Icon name="upload" size={21} /></span>
+                  <span className="drop-title">Drop an image here</span>
+                  <span className="drop-subtitle">or <u>browse your files</u></span>
+                  <span className="file-types">JPG, PNG, WEBP · max 10 MB</span>
+                </button>
+              )}
+              <input ref={fileInputRef} id="file-input" className="visually-hidden" type="file" accept="image/*" onChange={handleFileInput} />
+              {imageError && <p className="alert alert-danger error-message" role="alert">{imageError}</p>}
             </div>
-            <textarea
-              id="prompt"
-              value={prompt}
-              maxLength={240}
-              onChange={(event) => setPrompt(event.target.value)}
-              placeholder="Changing..."
-              rows="5"
-            />
-            <p className="field-hint">For example, apply your watermark or highlight the edges.</p>
-          </div>
-        </div>
 
-        <div className="divider" />
-
-        <div className="audio-section">
-          <div className="audio-copy">
-            <div className="field-label-row"><label>Describe what you want changed <span className="optional-label">optional</span></label></div>
-            <p>Change the color, or make a black-and-white copy.</p>
+            <div className="field-block prompt-block col-12 col-md-6">
+              <div className="field-label-row d-flex flex-wrap gap-2">
+                <label className="form-label" htmlFor="prompt">What do you want to change? <span className="optional-label">optional</span></label>
+                <span className="character-count">{prompt.length}/240</span>
+              </div>
+              <textarea
+                className="form-control"
+                id="prompt"
+                value={prompt}
+                maxLength={240}
+                onChange={(event) => setPrompt(event.target.value)}
+                placeholder="Changing..."
+                rows="5"
+              />
+              <p className="field-hint">For example, apply your watermark or highlight the edges.</p>
+            </div>
           </div>
-          <div className="audio-control-wrap">
-            <button type="button" className={`record-button ${isRecording ? 'is-recording' : ''}`} onClick={toggleRecording} aria-pressed={isRecording}>
-              <span className="record-icon">{isRecording ? <span className="stop-square" /> : <Icon name="mic" size={19} />}</span>
-              <span>{isRecording ? 'Recording...' : audioUrl ? 'Re-record note' : 'Record a note'}</span>
-              {isRecording && <span className="record-timer">{formatTime(recordingSeconds)}</span>}
+
+          <div className="divider" />
+
+          <div className="audio-section d-flex flex-column flex-md-row gap-3">
+            <div className="audio-copy">
+              <div className="field-label-row d-flex flex-wrap gap-2"><label>Describe what you want changed <span className="optional-label">optional</span></label></div>
+              <p>Change the color, or make a black-and-white copy.</p>
+            </div>
+            <div className="audio-control-wrap">
+              <button
+                className={`btn btn-outline-secondary record-button ${isRecording ? 'is-recording' : ''}`}
+                type="button"
+                onClick={toggleRecording}
+                aria-pressed={isRecording}
+              >
+                <span className="record-icon">{isRecording ? <span className="stop-square" /> : <Icon name="mic" size={19} />}</span>
+                <span>{isRecording ? 'Recording...' : audioUrl ? 'Re-record note' : 'Record a note'}</span>
+                {isRecording && <span className="record-timer">{formatTime(recordingSeconds)}</span>}
+              </button>
+              {audioUrl && !isRecording && <audio className="audio-player" controls src={audioUrl} aria-label="Your recorded note" />}
+              {audioError && <p className="alert alert-danger error-message audio-error" role="alert">{audioError}</p>}
+            </div>
+          </div>
+
+          <div className="form-footer d-flex flex-column-reverse flex-md-row gap-3">
+            <div className="privacy-note"><span className="privacy-dot" /> Make sure to sign in to Pinterest.</div>
+            <button
+              className="btn btn-primary primary-button"
+              type="submit"
+              disabled={submitState === 'loading'}
+            >
+              {submitState === 'loading' ? (
+                'Warming up the muse...'
+              ) : submitState === 'success' ? (
+                <><Icon name="check" size={17} /> Ready to polish</>
+              ) : (
+                <>Create and upload to Pinterest <Icon name="arrow" size={17} /></>
+              )}
             </button>
-            {audioUrl && !isRecording && <audio className="audio-player" controls src={audioUrl} aria-label="Your recorded note" />}
-            {audioError && <p className="error-message audio-error" role="alert">{audioError}</p>}
           </div>
-        </div>
 
-        <div className="form-footer">
-          <div className="privacy-note"><span className="privacy-dot" /> Make sure to sign in to Pinterest.</div>
-          <button className="primary-button" type="submit" disabled={submitState === 'loading'}>
-            {submitState === 'loading' ? 'Warming up the muse...' : submitState === 'success' ? <><Icon name="check" size={17} /> Ready to polish</> : <>Create and upload to Pinterest <Icon name="arrow" size={17} /></>}
-          </button>
-        </div>
-
-        {submitState === 'success' && (
-          <div className="success-panel" role="status">
-            <div><span className="success-icon"><Icon name="check" size={17} /></span><span>Your brief is ready for the Gemini polish step.</span></div>
-            <button type="button" className="pinterest-button" onClick={handlePinterest} disabled={pinterestState === 'success'}>
-              <Icon name="pinterest" size={17} /> {pinterestState === 'success' ? 'Uploaded to Pinterest' : 'Put on Pinterest'}
-            </button>
-          </div>
-        )}
-      </form>
+          {submitState === 'success' && (
+            <div className="alert alert-success success-panel d-flex flex-column flex-md-row gap-3" role="status">
+              <div><span className="success-icon"><Icon name="check" size={17} /></span><span>Your brief is ready for the Gemini polish step.</span></div>
+              <button type="button" className="btn btn-danger pinterest-button" onClick={handlePinterest} disabled={pinterestState === 'success'}>
+                <Icon name="pinterest" size={17} /> {pinterestState === 'success' ? 'Uploaded to Pinterest' : 'Put on Pinterest'}
+              </button>
+            </div>
+          )}
+        </form>
+      </div>
     </main>
   )
 }
