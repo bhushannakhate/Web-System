@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import '../styles/ScopedBootstrap.scss'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import './LoginPage.css'
 
 function LoginField({ id, label, ...inputProps }) {

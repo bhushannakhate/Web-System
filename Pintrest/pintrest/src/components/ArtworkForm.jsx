@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import '../styles/ScopedBootstrap.scss'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import './ArtworkForm.css'
 
 

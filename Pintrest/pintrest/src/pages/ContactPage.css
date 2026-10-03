@@ -4,7 +4,7 @@
 .contact-intro h1 { color: #302d28; font-size: clamp(48px, 7vw, 78px); font-weight: 500; letter-spacing: -.07em; line-height: 1; margin: 0; }
 .contact-intro h1 em { color: #b25a48; font-family: Georgia, 'Times New Roman', serif; font-weight: 400; }
 .contact-intro > p:last-child { color: #777168; font-size: 14px; line-height: 1.75; margin: 19px 0 0; max-width: 520px; }
-.contact-layout { align-items: stretch; background: rgba(255, 253, 249, .75); border: 1px solid #e8e1d7; border-radius: 4px; display: grid; grid-template-columns: .78fr 1.22fr; }
+.contact-layout { align-items: stretch; background: rgba(255, 253, 249, .75); border: 1px solid #e8e1d7; border-radius: 4px; }
 .contact-aside { background: #f0e9de; border-radius: 4px 0 0 4px; display: flex; flex-direction: column; padding: 34px clamp(24px, 4vw, 43px); }
 .contact-note-mark { align-items: center; background: #b25a48; border-radius: 50%; color: white; display: flex; font-size: 20px; height: 43px; justify-content: center; width: 43px; }
 .contact-aside h2 { color: #39352f; font-family: Georgia, 'Times New Roman', serif; font-size: 27px; font-weight: 400; letter-spacing: -.035em; line-height: 1.2; margin: 27px 0 12px; }
@@ -16,9 +16,9 @@
 .contact-recipient-list li + li { margin-top: 4px; }
 .contact-form-wrap { padding: 34px clamp(23px, 4vw, 44px); }
 .contact-form { display: flex; flex-direction: column; gap: 20px; }
-.contact-field-row { display: grid; gap: 17px; grid-template-columns: 1fr 1fr; }
+.contact-field-row { --bs-gutter-y: 1rem; }
 .contact-field { display: flex; flex-direction: column; gap: 8px; }
-.contact-field label { color: #39352f; font-size: 11px; }
+.contact-field label { color: #39352f; font-size: 11px; margin-bottom: 0; }
 .contact-field label span { color: #b25a48; }
 .contact-field input, .contact-field select, .contact-field textarea { background: #fffdf9; border: 1px solid #e1dbd1; border-radius: 3px; color: #423e38; font: inherit; font-size: 12px; outline: 0; padding: 12px 13px; transition: border .2s, box-shadow .2s; width: 100%; }
 .contact-field input, .contact-field select { min-height: 43px; }
@@ -34,14 +34,12 @@
 @media (max-width: 720px) {
   .contact-page { padding: 0 22px 50px; }
   .contact-intro { padding: 48px 0 32px; }
-  .contact-layout { grid-template-columns: 1fr; }
   .contact-aside { border-radius: 4px 4px 0 0; }
   .contact-aside h2 { max-width: 420px; }
   .contact-aside-rule { margin-top: 25px; }
 }
 
 @media (max-width: 480px) {
-  .contact-field-row { grid-template-columns: 1fr; }
   .contact-form-footer { align-items: stretch; flex-direction: column; }
   .contact-form-footer button { justify-content: center; }
 }

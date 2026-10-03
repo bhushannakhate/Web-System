@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import 'bootstrap/dist/css/bootstrap.min.css'
 import './AboutPage.css'
 
 const principles = [
@@ -21,15 +22,15 @@ const principles = [
 
 function AboutPage() {
   return (
-    <main className="about-page">
-      <section className="about-hero" aria-labelledby="about-title">
-        <div className="about-hero-copy">
+    <main className="bootstrap-page about-page container">
+      <section className="about-hero row g-5" aria-labelledby="about-title">
+        <div className="about-hero-copy col-12 col-md-6">
           <p className="page-eyebrow"><span /> A little about us</p>
           <h1 id="about-title">Good ideas deserve <em>a place to grow.</em></h1>
           <p className="about-intro">Pinboard Studio is a simple creative space for shaping visual ideas. Start with an image, add your direction, and make room for what comes next.</p>
-          <Link className="about-cta" to="/">Explore the studio <span aria-hidden="true">↗</span></Link>
+          <Link className="about-cta btn btn-dark" to="/">Explore the studio <span aria-hidden="true">↗</span></Link>
         </div>
-        <div className="about-art" role="img" aria-label="Abstract illustration of colorful creative ideas">
+        <div className="about-art col-12 col-md-6" role="img" aria-label="Abstract illustration of colorful creative ideas">
           <div className="art-orbit art-orbit-one" />
           <div className="art-orbit art-orbit-two" />
           <div className="art-sun" />
@@ -45,9 +46,9 @@ function AboutPage() {
           <p className="page-eyebrow"><span /> What we believe</p>
           <h2 id="principles-title">A thoughtful start makes all the difference.</h2>
         </div>
-        <div className="principle-grid">
+        <div className="principle-grid row row-cols-1 row-cols-md-3 g-3">
           {principles.map((principle) => (
-            <article className="principle-card" key={principle.number}>
+            <article className="principle-card card h-100" key={principle.number}>
               <span className="principle-number">{principle.number}</span>
               <h3>{principle.title}</h3>
               <p>{principle.description}</p>

@@ -1,4 +1,4 @@
-.site-layout { color: #272522; display: flex; flex-direction: column; min-height: 100vh; }
+.site-layout { background: #f8f5ef; color: #272522; display: flex; flex-direction: column; font-family: 'DM Sans', system-ui, sans-serif; min-height: 100vh; }
 #main-content { flex: 1; }
 .page-eyebrow { align-items: center; color: #a45d4c; display: flex; font-family: 'DM Mono', monospace; font-size: 10px; gap: 9px; letter-spacing: .12em; margin: 0 0 22px; text-transform: uppercase; }
 .page-eyebrow > span { background: #b25a48; border-radius: 50%; height: 6px; width: 6px; }
