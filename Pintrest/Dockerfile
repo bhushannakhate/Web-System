@@ -2,7 +2,7 @@ FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# The app is in the nested pintrest/ directory; install from the lockfile first.
+# The app is nested in the pintrest/ directory under this build context.
 COPY pintrest/package*.json ./
 RUN npm ci
 
