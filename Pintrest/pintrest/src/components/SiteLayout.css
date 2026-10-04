@@ -67,13 +67,4 @@ nav{
   color: #be705d;
 }
 
-#navBar li a:hover::after {
-  content: "";
-  width: 30%;
-  height: 2px;
-  background: #be705d;
-  position: absolute;
-  bottom: -4px;
-  left: 20px;
 
-}
