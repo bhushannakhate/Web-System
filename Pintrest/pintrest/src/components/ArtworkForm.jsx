@@ -3,11 +3,12 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './ArtworkForm.css'
 
 
+// Keep the upload limit in one place so validation and its explanation stay consistent.
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 
 function Icon({ name, size = 20, strokeWidth = 1.8 }) {
   const paths = {
-    // ignore these, these are jus tthe icons for the middle box
+    // Store SVG paths by name so the same small Icon component can draw each icon.
     arrow: <><path d="M12 5v14" /><path d="m18 13-6 6-6-6" /></>,
     check: <><path d="m5 12 4.3 4.3L19 6.7" /></>,
     mic: <><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" /></>,
@@ -23,6 +24,7 @@ function Icon({ name, size = 20, strokeWidth = 1.8 }) {
 }
 
 function ArtworkForm() {
+  // State is data that affects what React renders; updates trigger a re-render.
   const [image, setImage] = useState(null)
   const [imageError, setImageError] = useState('')
   const [prompt, setPrompt] = useState('')
@@ -33,6 +35,7 @@ function ArtworkForm() {
   const [submitState, setSubmitState] = useState('idle')
   const [pinterestState, setPinterestState] = useState('idle')
 
+  // Refs hold DOM/browser objects that should persist without causing re-renders.
   const fileInputRef = useRef(null)
   const recorderRef = useRef(null)
   const streamRef = useRef(null)
@@ -40,6 +43,7 @@ function ArtworkForm() {
   const timerRef = useRef(null)
 
   useEffect(() => {
+    // Object URLs point to local files; revoke each URL when the image changes or unmounts.
     const imageUrl = image?.url
     return () => {
       if (imageUrl) URL.revokeObjectURL(imageUrl)
@@ -47,6 +51,7 @@ function ArtworkForm() {
   }, [image])
 
   useEffect(() => {
+    // Release microphone and timer resources if the page is closed while recording.
     return () => {
       if (audioUrl) URL.revokeObjectURL(audioUrl)
     }
@@ -64,6 +69,7 @@ function ArtworkForm() {
   const setImageFile = (file) => {
     setImageError('')
     if (!file) return
+    // Validate file type and size before creating a preview for the selected image.
     if (!file.type.startsWith('image/')) {
       setImageError('Please choose an image file (JPG, PNG, WebP, or GIF).')
       return
@@ -115,11 +121,13 @@ function ArtworkForm() {
     }
 
     try {
+      // The browser asks permission for the microphone; recording APIs are asynchronous.
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
       streamRef.current = stream
       chunksRef.current = []
       const recorder = new MediaRecorder(stream)
       recorderRef.current = recorder
+      // MediaRecorder delivers recorded audio in chunks; join them when recording stops.
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) chunksRef.current.push(event.data)
       }
@@ -149,6 +157,7 @@ function ArtworkForm() {
 
   const handleSubmit = (event) => {
     event.preventDefault()
+    // This demo requires an image, then shows a simulated processing result.
     if (!image) {
       setImageError('Add an image before creating your polished artwork.')
       return

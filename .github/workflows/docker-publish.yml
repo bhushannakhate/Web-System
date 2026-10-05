@@ -1,6 +1,7 @@
 name: Build and publish Docker image
 
 on:
+  # Publish an image whenever a branch or version tag is pushed to GitHub.
   push:
     branches:
       - '**'
@@ -31,6 +32,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ secrets.DOCKERHUB_USERNAME }}/pintrest-web
+          # The branch tag is readable; the SHA tag points to one exact commit.
           tags: |
             type=ref,event=branch
             type=sha,prefix=sha-

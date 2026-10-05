@@ -3,9 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './ContactPage.css'
 
 function ContactPage() {
+  // Controls whether the page displays confirmation after preparing the email draft.
   const [emailPrepared, setEmailPrepared] = useState(false)
 
   const handleSubmit = (event) => {
+    // Stop the browser's default page reload so JavaScript can prepare the email.
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
     const recipients = [
@@ -13,6 +15,7 @@ function ContactPage() {
       'ssotomejia@horizon.csueastbay.edu',
       'rtorres32@horizon.csueastbay.edu',
     ]
+    // Read fields by their HTML name attributes and assemble the email draft.
     const subject = `Pinboard Studio contact: ${formData.get('topic')}`
     const body = [
       `Name: ${formData.get('name')}`,
@@ -21,9 +24,11 @@ function ContactPage() {
       '',
       formData.get('message'),
     ].join('\n')
+    // URL-encode the text so spaces and punctuation are valid in a mailto link.
     const mailtoUrl = `mailto:${recipients.join(',')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
 
     setEmailPrepared(true)
+    // Ask the browser to open the configured email app; the visitor still presses Send.
     window.location.href = mailtoUrl
   }
 

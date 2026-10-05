@@ -3,17 +3,19 @@ import './SiteLayout.css'
 
 function SiteLayout() {
 
+    // React Router passes isActive so Bootstrap can style the current page link.
     const navLinkClass = ({ isActive }) =>
         `nav-link${isActive ? ' active' : ''}`
 
     return (
         <div className="site-layout">
+            {/* This header and footer wrap every page rendered by the router. */}
             <header className="site-header">
                 <nav className="navbar navbar-expand-md"
                      aria-label="Primary navigation">
 
-                    <div className="site-header-inner">
-                        <NavLink className="site-brand navbar-brand" to="/" aria-label="Pinboard Studio home">
+                    <div className="site-header-inner d-flex justify-content-between align-items-center w-100">
+                        <NavLink className="site-brand navbar-brand me-3" to="/" aria-label="Pinboard Studio home">
                          <span className="brand-mark" aria-hidden="true">
                              p
                             </span>
@@ -27,29 +29,11 @@ function SiteLayout() {
                             <span className="navbar-toggler-icon"></span>
                         </button>
 
-                        <div className="collapse navbar-collapse justify-content-end" id="primaryNavigation">
-                            <ul id="navBar" className="navbar-nav site-nav">
-                                <li>
-                                    <NavLink end className={navLinkClass} to="/">
-                                        Home
-                                    </NavLink>
-                                </li>
-
-                                <li>
-                                    <NavLink className={navLinkClass} to="/about">
-                                        About
-                                    </NavLink>
-                                </li>
-
+                        <div className="collapse navbar-collapse justify-content-end ms-auto" id="primaryNavigation">
+                            <ul id="navBar" className="navbar-nav site-nav ms-auto">
                                 <li>
                                     <NavLink className={navLinkClass} to="/login">
                                         Login
-                                    </NavLink>
-                                </li>
-
-                                <li>
-                                    <NavLink className="nav-link" to="">
-                                        Login with Pinterest
                                     </NavLink>
                                 </li>
                             </ul>
@@ -58,6 +42,7 @@ function SiteLayout() {
                 </nav>
             </header>
 
+            {/* Outlet is replaced by the selected route, such as AboutPage or LoginPage. */}
             <div id="main-content"><Outlet /></div>
 
             <footer className="site-footer">

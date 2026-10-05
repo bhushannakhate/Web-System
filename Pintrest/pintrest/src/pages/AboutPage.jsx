@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './AboutPage.css'
 
+// Keep repeated card content as data; map() below creates one card for each item.
 const principles = [
   {
     number: '01',
@@ -46,6 +47,7 @@ function AboutPage() {
           <p className="page-eyebrow"><span /> What we believe</p>
           <h2 id="principles-title">A thoughtful start makes all the difference.</h2>
         </div>
+        {/* Bootstrap displays one column on small screens and three from md upward. */}
         <div className="principle-grid row row-cols-1 row-cols-md-3 g-3">
           {principles.map((principle) => (
             <article className="principle-card card h-100" key={principle.number}>
