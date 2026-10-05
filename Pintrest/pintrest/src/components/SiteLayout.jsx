@@ -3,11 +3,13 @@ import './SiteLayout.css'
 
 function SiteLayout() {
 
+    // React Router passes isActive so Bootstrap can style the current page link.
     const navLinkClass = ({ isActive }) =>
         `nav-link${isActive ? ' active' : ''}`
 
     return (
         <div className="site-layout">
+            {/* This header and footer wrap every page rendered by the router. */}
             <header className="site-header">
                 <nav className="navbar navbar-expand-md"
                      aria-label="Primary navigation">
@@ -40,6 +42,7 @@ function SiteLayout() {
                 </nav>
             </header>
 
+            {/* Outlet is replaced by the selected route, such as AboutPage or LoginPage. */}
             <div id="main-content"><Outlet /></div>
 
             <footer className="site-footer">

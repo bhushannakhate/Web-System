@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './LoginPage.css'
 
 function LoginField({ id, label, ...inputProps }) {
+  // Reuse one labeled field component for login and account-creation forms.
   return (
     <div className="login-field">
       <label className="form-label" htmlFor={id}>{label}</label>
@@ -12,9 +13,11 @@ function LoginField({ id, label, ...inputProps }) {
 }
 
 function CreateAccountForm({ onCreate }) {
+  // Each input is controlled: its displayed value comes from this React state.
   const [account, setAccount] = useState({ name: '', email: '', login: '', password: '' })
 
   function handleChange(event) {
+    // Use the input's name to update only its matching value in the account object.
     const { name, value } = event.target
     setAccount((previous) => ({ ...previous, [name]: value }))
   }
@@ -49,6 +52,7 @@ function CreateAccountForm({ onCreate }) {
 }
 
 function LoginPage() {
+  // These state values control the fields, create-account panel, and status message.
   const [credentials, setCredentials] = useState({ login: '', password: '' })
   const [showCreateAccount, setShowCreateAccount] = useState(false)
   const [message, setMessage] = useState('')
@@ -61,7 +65,7 @@ function LoginPage() {
   }
 
   function handleCreateAccount({ login, password }) {
-    // Keep the new credentials in the parent when the account form unmounts.
+    // Copy the values up before hiding the child form, then return focus to Login.
     setCredentials({ login, password })
     setShowCreateAccount(false)
     setMessage('')
@@ -70,6 +74,7 @@ function LoginPage() {
 
   function handleLoginSubmit(event) {
     event.preventDefault()
+    // Prevent navigation; this demo does not connect to an authentication server.
     setMessage('')
   }
 
