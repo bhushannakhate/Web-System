@@ -1,4 +1,5 @@
 import { useState } from 'react'
+// Bootstrap styles the responsive layout, form controls, buttons, and status alert.
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './ContactPage.css'
 
@@ -40,6 +41,7 @@ function ContactPage() {
         <p>Questions, feedback, or a bright idea? Send a note. We are always glad to hear what you are making.</p>
       </section>
 
+      {/* Bootstrap columns stack on mobile, then split the info panel and form on md screens. */}
       <div className="contact-layout row g-0">
         <aside className="contact-aside col-12 col-md-5" aria-label="Contact information">
           <div className="contact-note-mark" aria-hidden="true">✳</div>
@@ -58,9 +60,11 @@ function ContactPage() {
 
         <section className="contact-form-wrap col-12 col-md-7" aria-label="Send us a message">
           <form className="contact-form" onSubmit={handleSubmit}>
+            {/* `row g-3` creates a Bootstrap grid with consistent gaps between form fields. */}
             <div className="contact-field-row row g-3">
               <div className="contact-field col-12 col-md-6">
                 <label className="form-label" htmlFor="contact-name">Your name <span aria-hidden="true">*</span></label>
+                {/* `form-control` gives the input Bootstrap sizing, border, and focus styling. */}
                 <input className="form-control" id="contact-name" name="name" type="text" autoComplete="name" placeholder="Jane Smith" required />
               </div>
               <div className="contact-field col-12 col-md-6">
@@ -71,6 +75,7 @@ function ContactPage() {
 
             <div className="contact-field">
               <label className="form-label" htmlFor="contact-topic">What is this about?</label>
+              {/* `form-select` applies Bootstrap styling specifically for select elements. */}
               <select className="form-select" id="contact-topic" name="topic" defaultValue="" required>
                 <option value="" disabled>Choose a topic</option>
                 <option value="feedback">Feedback or suggestion</option>
@@ -86,8 +91,10 @@ function ContactPage() {
 
             <div className="contact-form-footer">
               <p>This opens your email app so you can send your message.</p>
+              {/* `btn` enables Bootstrap button styling; `btn-dark` selects its dark color variant. */}
               <button className="btn btn-dark" type="submit">Open email app <span aria-hidden="true">↗</span></button>
             </div>
+            {/* Show a Bootstrap success alert after creating the mailto draft. */}
             {emailPrepared && <p className="contact-confirmation alert alert-success" role="status">Your email app should open with the recipients and message filled in. Review it and press Send to deliver it.</p>}
           </form>
         </section>
