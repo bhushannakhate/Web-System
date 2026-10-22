@@ -36,6 +36,11 @@ function SiteLayout() {
                                         Login
                                     </NavLink>
                                 </li>
+                                <li>
+                                    <NavLink className={navLinkClass} to="/customers">
+                                        Customers
+                                    </NavLink>
+                                </li>
                             </ul>
                         </div>
                     </div>

@@ -4,6 +4,7 @@ import SiteLayout from './components/SiteLayout'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import LoginPage from './pages/LoginPage'
+import CustomersPage from './pages/CustomersPage'
 
 function App() {
   // BrowserRouter reads the URL; Routes selects the matching page component.
@@ -16,6 +17,7 @@ function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="login" element={<LoginPage />} />
+          <Route path="customers" element={<CustomersPage />} />
           {/* Unknown URLs return to Home; replace avoids adding the bad URL to history. */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
