@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+// Load Bootstrap's ready-made grid, spacing, card, and button styles.
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './AboutPage.css'
 
@@ -22,6 +23,7 @@ const principles = [
 ]
 
 function AboutPage() {
+  // The container centers content; Bootstrap row/column classes make the hero responsive.
   return (
     <main className="bootstrap-page about-page container">
       <section className="about-hero row g-5" aria-labelledby="about-title">
@@ -29,6 +31,7 @@ function AboutPage() {
           <p className="page-eyebrow"><span /> A little about us</p>
           <h1 id="about-title">Good ideas deserve <em>a place to grow.</em></h1>
           <p className="about-intro">Pinboard Studio is a simple creative space for shaping visual ideas. Start with an image, add your direction, and make room for what comes next.</p>
+          {/* Bootstrap button classes provide the base button appearance; about CSS customizes it. */}
           <Link className="about-cta btn btn-dark" to="/">Explore the studio <span aria-hidden="true">↗</span></Link>
         </div>
         <div className="about-art col-12 col-md-6" role="img" aria-label="Abstract illustration of colorful creative ideas">
@@ -47,8 +50,9 @@ function AboutPage() {
           <p className="page-eyebrow"><span /> What we believe</p>
           <h2 id="principles-title">A thoughtful start makes all the difference.</h2>
         </div>
-        {/* Bootstrap displays one column on small screens and three from md upward. */}
+        {/* `row-cols-*` sets responsive card columns; `g-3` adds gutters between cards. */}
         <div className="principle-grid row row-cols-1 row-cols-md-3 g-3">
+          {/* `card` supplies Bootstrap styling, while `h-100` keeps each card equally tall. */}
           {principles.map((principle) => (
             <article className="principle-card card h-100" key={principle.number}>
               <span className="principle-number">{principle.number}</span>
