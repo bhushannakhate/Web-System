@@ -14,10 +14,15 @@ const CUSTOMER_FIELDS = {
 }
 
 async function requestCustomers(path, options) {
-  const response = await fetch(`${API_BASE_URL}/api${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    ...options,
-  })
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}/api${path}`, {
+      headers: { 'Content-Type': 'application/json', ...options?.headers },
+      ...options,
+    })
+  } catch {
+    throw new Error('Could not reach the customer API. Check that the backend is running and allows this website origin.')
+  }
   const payload = await response.json().catch(() => ({}))
   if (!response.ok) throw new Error(payload.error || 'The customer service could not complete the request.')
   return payload
