@@ -125,7 +125,7 @@ function CustomersPage() {
         }),
       })
       setForm(CUSTOMER_FIELDS)
-      setNotice(editingCustomer ? 'Customer details updated.' : 'Customer saved to the Firestore customers collection.')
+      setNotice(editingCustomer ? 'Customer details updated.' : 'Customer saved to the MongoDB customers collection.')
       setEditingCustomer(null)
       await loadCustomers()
     } catch (saveError) {
@@ -138,7 +138,7 @@ function CustomersPage() {
   return (
     <main className="customers-page container">
       <header className="customers-heading">
-        <p className="page-eyebrow"><span /> Project 2 · Firestore</p>
+        <p className="page-eyebrow"><span /> Project 2 · MongoDB</p>
         <h1>Customer <em>directory.</em></h1>
         <p>Register a Pinboard Studio customer and review the first 10 records stored in the live database.</p>
       </header>
@@ -178,7 +178,7 @@ function CustomersPage() {
             <div><p className="customer-kicker">DATABASE PREVIEW</p><h2 id="directory-title">First 10 customers</h2></div>
             <button className="customer-refresh" type="button" onClick={loadCustomers} disabled={loading} aria-label="Refresh customer list">↻</button>
           </div>
-          <p className="directory-caption">Live results from the Firestore <strong>customers</strong> collection.</p>
+          <p className="directory-caption">Live results from the MongoDB <strong>customers</strong> collection.</p>
           {loading ? <p className="directory-empty" role="status">Loading customer records…</p> : customers.length === 0 ? (
             <p className="directory-empty">No customers yet. Submit the form to create the first record.</p>
           ) : (
