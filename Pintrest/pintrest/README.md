@@ -1,19 +1,57 @@
-# React + Vite
+# Project One — Pinboard Studio UI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React and Vite frontend for Pinboard Studio. The deployed customer directory uses the Project 2 Customer API.
 
-Currently, two official plugins are available:
+## Deployment
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **UI service:** https://project-1-ui-m5lsuu6ouq-uc.a.run.app
+- **Customers page:** https://project-1-ui-m5lsuu6ouq-uc.a.run.app/customers
+- **Google Cloud project:** `project-2-pinboard-2026`
+- **Region:** `us-central1`
+- **API base URL:** https://project-2-api-m5lsuu6ouq-uc.a.run.app
 
-## React Compiler
+## API endpoints used by the UI
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+The Customer API provides these endpoints. The customer directory calls the four CRUD endpoints from `src/pages/CustomersPage.jsx`; `/api/health` is available for availability checks. Set `VITE_API_BASE_URL` at build time to the API origin.
 
-## Expanding the ESLint configuration
+| Method | Endpoint | UI action |
+|---|---|---|
+| `GET` | `/api/health` | Check API availability. |
+| `GET` | `/api/customers?limit=10` | Load the customer directory and refresh records. |
+| `POST` | `/api/customers` | Create a customer from the directory form. |
+| `PATCH` | `/api/customers/:id` | Update the selected customer. |
+| `DELETE` | `/api/customers/:id` | Permanently remove the selected customer. |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Application routes
+
+- `/` — artwork form
+- `/about` — about Pinboard Studio
+- `/contact` — contact page
+- `/login` — login page
+- `/customers` — customer directory and CRUD form
+
+## Run locally
+
+```bash
+npm install
+npm run dev
+```
+
+Create `.env.production` or set `VITE_API_BASE_URL` to the API base URL:
+
+```dotenv
+VITE_API_BASE_URL=https://project-2-api-m5lsuu6ouq-uc.a.run.app
+```
+
+For local development, `vite.config.js` proxies `/api` requests to `http://localhost:4000`.
+
+## Build
+
+```bash
+npm run build
+```
+
+The static output is written to `dist/` and served by Apache in the Cloud Run container.
 
 ## Contact form
 
