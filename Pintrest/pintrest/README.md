@@ -4,11 +4,20 @@ React and Vite frontend for Pinboard Studio, including the Project 2 Firebase Au
 
 ## Deployment
 
-- **UI service:** https://project-1-ui-m5lsuu6ouq-uc.a.run.app
-- **Customers page:** https://project-1-ui-m5lsuu6ouq-uc.a.run.app/customers
+- **UI:** https://project-2-pinboard-2026.web.app
+- **Customers page:** https://project-2-pinboard-2026.web.app/customers
 - **Google Cloud project:** `project-2-pinboard-2026`
-- **Region:** `us-central1`
 - **API base URL:** https://project-2-api-m5lsuu6ouq-uc.a.run.app
+- The previous Cloud Run UI remains available at https://project-1-ui-m5lsuu6ouq-uc.a.run.app; Firebase Hosting is the canonical UI for authentication.
+
+Deploy the static app to Firebase Hosting after building:
+
+```bash
+npm run build
+npx firebase-tools deploy --only hosting --project project-2-pinboard-2026
+```
+
+The default `web.app` domain is already authorized for Firebase Authentication. Hosting has a no-cost quota; this project is on the Blaze plan, so usage beyond included quotas may be billed.
 
 ## Project 2 API endpoints
 
@@ -46,7 +55,7 @@ npm install
 npm run dev
 ```
 
-Copy `.env.example` to `.env.local` and fill in the Firebase Web App values from Firebase Console → Project settings → Your apps. The client API key and app ID are Firebase web configuration, not service-account credentials; never put a service-account JSON in this frontend. Enable Email/Password and Google under Firebase Authentication → Sign-in method, and add the deployed UI domain to Authorized domains.
+Copy `.env.example` to `.env.local` and fill in the Firebase Web App values from Firebase Console → Project settings → Your apps. The client API key and app ID are Firebase web configuration, not service-account credentials; never put a service-account JSON in this frontend. Enable Email/Password and Google under Firebase Authentication → Sign-in method. The default Firebase Hosting domain is authorized automatically.
 
 Set `VITE_API_BASE_URL` to the API base URL:
 
