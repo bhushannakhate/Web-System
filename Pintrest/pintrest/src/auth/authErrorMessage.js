@@ -9,6 +9,7 @@ const AUTH_ERROR_MESSAGES = {
   'auth/popup-blocked': 'Your browser blocked the Google sign-in window. Allow pop-ups and try again.',
   'auth/popup-closed-by-user': 'The Google sign-in window was closed before sign-in completed.',
   'auth/network-request-failed': 'A network error interrupted sign-in. Check your connection and try again.',
+  'auth/configuration-not-found': 'Firebase Authentication is not initialized for this project. Complete its setup in Firebase Console.',
   'auth/operation-not-allowed': 'This sign-in method is not enabled for the Firebase project.',
 }
 
