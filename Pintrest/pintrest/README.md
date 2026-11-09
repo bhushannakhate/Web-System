@@ -58,7 +58,7 @@ For local development, `vite.config.js` proxies `/api` requests to `http://local
 
 ## Issue implementation log
 
-- **Project 2 issue #11 — React sign-in and account experience:** Added Firebase email/password registration and sign-in, Google sign-in, password reset, auth-state/token refresh handling, protected routes, an account view, and authenticated Firestore API requests. The implementation is in this frontend repository because the React UI is deployed separately from the Project 2 API. See [issue #11](https://github.com/bhushannakhate/project-2/issues/11).
+- **Project 2 issue #11 — React sign-in and account experience:** Added Firebase email/password registration and sign-in, Google sign-in, password reset, auth-state/token refresh handling, protected routes, an account view, and authenticated Firestore API requests. The implementation is in this frontend repository because the React UI is deployed separately from the Project 2 API. See [issue #11](https://github.com/bhushannakhate/project-2/issues/11) and [implementation PR #27](https://github.com/bhushannakhate/Web-System/pull/27).
 
 ## Build
 
