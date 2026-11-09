@@ -62,9 +62,7 @@ function SiteLayout() {
                 </div>
             </footer>
         </div>
-      </footer>
-    </div>
-  )
+    )
 }
 
 export default SiteLayout
