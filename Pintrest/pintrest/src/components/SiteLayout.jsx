@@ -1,11 +1,10 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { useAuth } from '../auth/useAuth'
 import './SiteLayout.css'
 
 function SiteLayout() {
-
-    // React Router passes isActive so Bootstrap can style the current page link.
-    const navLinkClass = ({ isActive }) =>
-        `nav-link${isActive ? ' active' : ''}`
+    const { user } = useAuth()
+    const navLinkClass = ({ isActive }) => `nav-link${isActive ? ' active' : ''}`
 
     return (
         <div className="site-layout">
@@ -32,10 +31,12 @@ function SiteLayout() {
                         <div className="collapse navbar-collapse justify-content-end ms-auto" id="primaryNavigation">
                             <ul id="navBar" className="navbar-nav site-nav ms-auto">
                                 <li>
-                                    <NavLink className={navLinkClass} to="/login">
-                                        Login
+                                    <NavLink className={navLinkClass} to={user ? '/account' : '/login'}>
+                                        {user ? 'Account' : 'Sign in'}
                                     </NavLink>
                                 </li>
+                                {!user && <li><NavLink className={navLinkClass} to="/register">Create account</NavLink></li>}
+                                {user && <li><NavLink className={navLinkClass} to="/studio">Studio</NavLink></li>}
                                 <li>
                                     <NavLink className={navLinkClass} to="/customers">
                                         Customers
