@@ -7,20 +7,21 @@ import LoginPage from './pages/LoginPage'
 import CustomersPage from './pages/CustomersPage'
 
 function App() {
-  // BrowserRouter reads the URL; Routes selects the matching page component.
   return (
     <BrowserRouter>
       <Routes>
-        {/* SiteLayout is shared by every route; its Outlet displays each child page. */}
+        {/* The evolved ArtworkForm is the home screen and has its own navigation. */}
+        <Route path="/" element={<ArtworkForm />} />
+
+        {/* Preserve the original shared layout for the existing content pages. */}
         <Route element={<SiteLayout />}>
-          <Route index element={<ArtworkForm />} />
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="customers" element={<CustomersPage />} />
-          {/* Unknown URLs return to Home; replace avoids adding the bad URL to history. */}
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   )
