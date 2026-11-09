@@ -1,0 +1,108 @@
+.landing-page {
+  margin: 0 auto;
+  max-width: 1240px;
+  padding: clamp(58px, 11vw, 140px) 6vw 72px;
+}
+
+.landing-hero {
+  max-width: 760px;
+}
+
+.landing-hero h1 {
+  color: #302d28;
+  font-size: clamp(54px, 10vw, 112px);
+  font-weight: 500;
+  letter-spacing: -.08em;
+  line-height: .96;
+  margin: 0;
+}
+
+.landing-hero h1 em {
+  color: #b25a48;
+  font-family: Georgia, serif;
+  font-weight: 400;
+}
+
+.landing-copy {
+  color: #777168;
+  font-size: clamp(15px, 2vw, 18px);
+  line-height: 1.7;
+  margin: 26px 0 0;
+  max-width: 530px;
+}
+
+.landing-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.landing-primary,
+.landing-secondary {
+  align-items: center;
+  border: 1px solid #302d28;
+  border-radius: 4px;
+  display: inline-flex;
+  font-size: 13px;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 20px;
+  text-decoration: none;
+  transition: background .2s, color .2s;
+}
+
+.landing-primary {
+  background: #302d28;
+  color: #fffdf9;
+}
+
+.landing-primary:hover {
+  background: #b25a48;
+  border-color: #b25a48;
+  color: #fffdf9;
+}
+
+.landing-secondary {
+  border-color: #d8d1c6;
+  color: #302d28;
+}
+
+.landing-secondary:hover {
+  background: #f3eee5;
+  color: #302d28;
+}
+
+.landing-note {
+  align-items: center;
+  border-top: 1px solid rgba(73, 65, 55, .14);
+  display: flex;
+  gap: 14px;
+  margin-top: clamp(70px, 13vw, 150px);
+  max-width: 760px;
+  padding-top: 16px;
+}
+
+.landing-note span {
+  color: #a45d4c;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+}
+
+.landing-note p {
+  color: #79736b;
+  font-size: 12px;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .landing-page {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .landing-actions > * {
+    flex: 1;
+  }
+}
