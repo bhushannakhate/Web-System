@@ -1,3 +1,4 @@
+
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import { StrictMode } from 'react'
@@ -7,9 +8,12 @@ import App from './App.jsx'
 import { AuthProvider } from './auth/AuthContext'
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </StrictMode>,
+    <StrictMode>
+        <AuthProvider>
+            <App />
+        </AuthProvider>
+    </StrictMode>,
 )
+
+
+
