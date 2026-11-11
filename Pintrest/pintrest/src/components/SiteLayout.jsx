@@ -57,6 +57,7 @@ function SiteLayout() {
                     <nav className="footer-nav" aria-label="Footer navigation">
                         <NavLink to="/about">About</NavLink>
                         <NavLink to="/contact">Contact</NavLink>
+                        <NavLink to="/privacy">Privacy</NavLink>
                     </nav>
                     <p className="footer-copyright">© {new Date().getFullYear()} Pinboard Studio</p>
                 </div>
