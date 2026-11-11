@@ -4,6 +4,7 @@ import ArtworkForm from './components/ArtworkForm'
 import SiteLayout from './components/SiteLayout'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import LoginPage from './pages/LoginPage'
 import CustomersPage from './pages/CustomersPage'
 import AccountPage from './pages/AccountPage'
@@ -862,6 +863,8 @@ function StudioLandingPage() {
           <Link to="/contact">Contact</Link>
           <span aria-hidden="true" />
           <Link to="/customers">Customers</Link>
+          <span aria-hidden="true" />
+          <Link to="/privacy">Privacy</Link>
         </nav>
       </footer>
 
@@ -878,6 +881,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<StudioLandingPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
         <Route element={<SiteLayout />}>
           <Route path="about" element={<AboutPage />} />
           <Route path="contact" element={<ContactPage />} />
