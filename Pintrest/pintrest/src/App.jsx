@@ -7,7 +7,6 @@ import CustomersPage from './pages/CustomersPage'
 import AccountPage from './pages/AccountPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import RegisterPage from './pages/RegisterPage'
-import ArtworkForm from './components/ArtworkForm'
 import PhotoWorkflow from './components/PhotoWorkflow'
 import SiteLayout from './components/SiteLayout'
 import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
@@ -32,10 +31,10 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/account" element={<AccountPage />} />
-            <Route path="/studio" element={<ArtworkForm />} />
           </Route>
         </Route>
 
+        <Route path="/studio" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
@@ -43,4 +42,3 @@ function App() {
 }
 
 export default App
-

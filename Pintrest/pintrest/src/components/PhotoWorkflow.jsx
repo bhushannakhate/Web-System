@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
+import { deleteUploadedCreation, uploadSourceImage } from '../services/mediaUpload'
 import './PhotoWorkflow.css'
 
 const samplePhotos = [
@@ -29,6 +30,9 @@ const samplePhotos = [
     src: 'https://images.unsplash.com/photo-1661954747645-94bfcae82215?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=86&w=1080',
   },
 ]
+
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024
+const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
 const steps = [
   { number: 1, label: 'Choose a photo' },
@@ -85,6 +89,7 @@ function PhotoWorkflow() {
   const [recordingSeconds, setRecordingSeconds] = useState(0)
   const [isDark, setIsDark] = useState(false)
   const [notice, setNotice] = useState('')
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const photoInputRef = useRef(null)
   const audioInputRef = useRef(null)
   const photoUrlRef = useRef('')
@@ -110,7 +115,18 @@ function PhotoWorkflow() {
     }
   }, [])
 
-  function chooseSample(photo) {
+  async function chooseSample(photo) {
+    if (selectedPhoto?.creationId) {
+      setIsUploadingPhoto(true)
+      try {
+        await deleteUploadedCreation(selectedPhoto.creationId, user)
+      } catch (error) {
+        setPhotoError(error.message)
+        setIsUploadingPhoto(false)
+        return
+      }
+      setIsUploadingPhoto(false)
+    }
     if (photoUrlRef.current) {
       URL.revokeObjectURL(photoUrlRef.current)
       photoUrlRef.current = ''
@@ -121,18 +137,31 @@ function PhotoWorkflow() {
     setNotice('')
   }
 
-  function chooseLocalPhoto(event) {
+  async function chooseLocalPhoto(event) {
     const file = event.target.files?.[0]
     event.target.value = ''
     setPhotoError('')
     if (!file) return
-    if (!file.type.startsWith('image/')) {
-      setPhotoError('Choose an image file such as JPG, PNG, WebP, or GIF.')
+    const supportedType = SUPPORTED_IMAGE_TYPES.has(file.type)
+    const supportedExtension = /\.(jpe?g|png|webp)$/i.test(file.name)
+    if (file.type ? !supportedType : !supportedExtension) {
+      setPhotoError('Choose a JPG, PNG, or WebP image.')
       return
     }
-    if (file.size > 20 * 1024 * 1024) {
-      setPhotoError('That photo is larger than 20 MB. Choose a smaller file.')
+    if (file.size > MAX_IMAGE_SIZE) {
+      setPhotoError('That photo is larger than 10 MB. Choose a smaller file.')
       return
+    }
+    if (selectedPhoto?.creationId) {
+      setIsUploadingPhoto(true)
+      try {
+        await deleteUploadedCreation(selectedPhoto.creationId, user)
+      } catch (error) {
+        setPhotoError(error.message)
+        setIsUploadingPhoto(false)
+        return
+      }
+      setIsUploadingPhoto(false)
     }
     if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
     const src = URL.createObjectURL(file)
@@ -142,6 +171,7 @@ function PhotoWorkflow() {
       name: file.name,
       alt: 'Preview of ' + file.name,
       src,
+      file,
       source: 'device',
     })
     setShowSamples(false)
@@ -276,6 +306,57 @@ function PhotoWorkflow() {
     setStep(nextStep)
   }
 
+  async function continueWorkflow() {
+    if (step === 1 && selectedPhoto?.source === 'device' && !selectedPhoto.creationId) {
+      if (!user) {
+        setPhotoError('Sign in before uploading a photo to your account.')
+        return
+      }
+
+      setIsUploadingPhoto(true)
+      setPhotoError('')
+      setNotice('')
+      try {
+        const { creationId, media } = await uploadSourceImage(
+          selectedPhoto.file,
+          user,
+        )
+        setSelectedPhoto((current) =>
+          current ? { ...current, creationId, media } : current,
+        )
+        moveToStep(2)
+      } catch (error) {
+        setPhotoError(error.message)
+      } finally {
+        setIsUploadingPhoto(false)
+      }
+      return
+    }
+    moveToStep(step + 1)
+  }
+
+  async function removeSelectedPhoto() {
+    if (!selectedPhoto) return
+    if (selectedPhoto.creationId) {
+      setIsUploadingPhoto(true)
+      setPhotoError('')
+      try {
+        await deleteUploadedCreation(selectedPhoto.creationId, user)
+      } catch (error) {
+        setPhotoError(error.message)
+        setIsUploadingPhoto(false)
+        return
+      }
+      setIsUploadingPhoto(false)
+    }
+    if (selectedIsLocal && photoUrlRef.current) {
+      URL.revokeObjectURL(photoUrlRef.current)
+      photoUrlRef.current = ''
+    }
+    setSelectedPhoto(null)
+    setPhotoError('')
+  }
+
   async function downloadPhoto() {
     if (!selectedPhoto) return
     setNotice('')
@@ -402,16 +483,18 @@ function PhotoWorkflow() {
                   className="photo-choice"
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
                 >
                   <span className="photo-choice-icon"><Icon name="upload" size={22} /></span>
                   <strong>Upload from your device</strong>
-                  <small>JPG, PNG, WebP, or GIF · up to 20 MB</small>
+                  <small>JPG, PNG, or WebP · up to 10 MB</small>
                   <span className="photo-choice-action">Choose a file <Icon name="arrow" size={15} /></span>
                 </button>
                 <button
                   className={'photo-choice sample-choice' + (showSamples ? ' is-active' : '')}
                   type="button"
                   onClick={() => setShowSamples((value) => !value)}
+                  disabled={isUploadingPhoto}
                 >
                   <span className="photo-choice-icon google-mark" aria-hidden="true">G</span>
                   <strong>Explore sample photos</strong>
@@ -422,7 +505,7 @@ function PhotoWorkflow() {
                   ref={photoInputRef}
                   className="visually-hidden"
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
                   onChange={chooseLocalPhoto}
                   aria-label="Choose a photo from your device"
                 />
@@ -443,7 +526,8 @@ function PhotoWorkflow() {
                         className={'sample-photo' + (selectedPhoto?.id === photo.id ? ' is-selected' : '')}
                         type="button"
                         key={photo.id}
-                        onClick={() => chooseSample({ ...photo, source: 'sample' })}
+                        onClick={() => void chooseSample({ ...photo, source: 'sample' })}
+                        disabled={isUploadingPhoto}
                         aria-pressed={selectedPhoto?.id === photo.id}
                       >
                         <img src={photo.src} alt={photo.alt} loading="lazy" />
@@ -469,17 +553,10 @@ function PhotoWorkflow() {
                 <div className="photo-preview-details">
                   <p className="workflow-kicker">YOUR STARTING POINT</p>
                   <h3>{selectedPhoto ? selectedPhoto.name : 'Nothing selected yet'}</h3>
-                  <p>{selectedPhoto ? (selectedIsLocal ? 'Selected from this device.' : 'Sample image for exploring the workflow.') : 'Choose a local photo or preview one of the sample images.'}</p>
+                  <p>                  {selectedPhoto ? (selectedPhoto.media ? 'Uploaded securely to your account.' : selectedIsLocal ? 'Selected from this device.' : 'Sample image for exploring the workflow.') : 'Choose a local photo or preview one of the sample images.'}</p>
                   {selectedPhoto && (
-                    <button className="workflow-link-button" type="button" onClick={() => {
-                      if (selectedIsLocal && photoUrlRef.current) {
-                        URL.revokeObjectURL(photoUrlRef.current)
-                        photoUrlRef.current = ''
-                      }
-                      setSelectedPhoto(null)
-                      setPhotoError('')
-                    }}>
-                      Remove photo
+                    <button className="workflow-link-button" type="button" onClick={() => void removeSelectedPhoto()} disabled={isUploadingPhoto}>
+                      {isUploadingPhoto ? 'Working…' : 'Remove photo'}
                     </button>
                   )}
                 </div>
@@ -629,10 +706,10 @@ function PhotoWorkflow() {
                 <button
                   className="workflow-primary-button"
                   type="button"
-                  disabled={step === 1 && !selectedPhoto}
-                  onClick={() => moveToStep(step + 1)}
+                  disabled={isUploadingPhoto || (step === 1 && !selectedPhoto)}
+                  onClick={() => void continueWorkflow()}
                 >
-                  Continue <Icon name="arrow" size={17} />
+                  {isUploadingPhoto ? 'Uploading…' : 'Continue'} {!isUploadingPhoto && <Icon name="arrow" size={17} />}
                 </button>
               ) : (
                 <button className="workflow-secondary-button" type="button" onClick={() => {
@@ -674,4 +751,3 @@ function PhotoWorkflow() {
 }
 
 export default PhotoWorkflow
-

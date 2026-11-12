@@ -12,8 +12,8 @@ function LandingPage() {
         <h1>Make room for <em>ideas.</em></h1>
         <p className="landing-copy">Collect inspiration, shape your next idea, and keep your creative work in one calm place.</p>
         <div className="landing-actions">
-          <Link className="landing-primary" to={user ? '/studio' : '/register'}>
-            {user ? 'Open your studio' : 'Create your account'}
+          <Link className="landing-primary" to={user ? '/' : '/register'}>
+            {user ? 'Continue creating' : 'Create your account'}
           </Link>
           {!user && <Link className="landing-secondary" to="/login">Sign in</Link>}
         </div>

@@ -70,8 +70,10 @@ function ArtworkForm() {
     setImageError('')
     if (!file) return
     // Validate file type and size before creating a preview for the selected image.
-    if (!file.type.startsWith('image/')) {
-      setImageError('Please choose an image file (JPG, PNG, WebP, or GIF).')
+    const supportedType = ['image/jpeg', 'image/png', 'image/webp'].includes(file.type)
+    const supportedExtension = /\.(jpe?g|png|webp)$/i.test(file.name)
+    if (file.type ? !supportedType : !supportedExtension) {
+      setImageError('Please choose a JPG, PNG, or WebP image.')
       return
     }
     if (file.size > MAX_IMAGE_SIZE) {
@@ -229,7 +231,7 @@ function ArtworkForm() {
                   <span className="file-types">JPG, PNG, WEBP · max 10 MB</span>
                 </button>
               )}
-              <input ref={fileInputRef} id="file-input" className="visually-hidden" type="file" accept="image/*" onChange={handleFileInput} />
+              <input ref={fileInputRef} id="file-input" className="visually-hidden" type="file" accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp" onChange={handleFileInput} />
               {imageError && <p className="alert alert-danger error-message" role="alert">{imageError}</p>}
             </div>
 

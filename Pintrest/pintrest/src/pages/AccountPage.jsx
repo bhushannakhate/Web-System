@@ -54,7 +54,7 @@ function AccountPage() {
       {profileError && <p className="auth-error" role="alert">{profileError}</p>}
       {loadingProfile && <p className="auth-loading" role="status">Loading your profile…</p>}
       <div className="auth-form">
-        <Link className="auth-button auth-button-secondary" to="/studio">Open your studio</Link>
+        <Link className="auth-button auth-button-secondary" to="/">Continue creating</Link>
         <button className="auth-button" type="button" onClick={handleSignOut} disabled={signingOut}>
           {signingOut ? 'Signing out…' : 'Sign out'}
         </button>
