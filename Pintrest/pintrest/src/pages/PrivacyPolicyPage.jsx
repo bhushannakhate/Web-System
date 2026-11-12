@@ -32,12 +32,11 @@ function PrivacyPolicyPage() {
               results and related creation details you choose to save.
             </li>
             <li>
-              <strong>Pinterest information:</strong> if you connect Pinterest,
-              the account authorization and the boards, Pins, and image
-              information needed to show you content you are permitted to
-              access. We only access Pinterest data through the permissions
-              you grant, and Pinterest handles your Pinterest password; we
-              never receive it.
+              <strong>Google Photos data:</strong> when you separately connect
+              Google Photos, we receive only the photos you select through
+              Google's Picker. We create a private Pinboard copy of an image
+              only after you choose to import it. The original remains in your
+              Google Photos account.
             </li>
             <li>
               <strong>Basic service information:</strong> information needed to
@@ -53,9 +52,10 @@ function PrivacyPolicyPage() {
             We use account information to sign you in and provide your account.
             We use selected images and your instructions to provide the
             requested image editing experience, and to save or return results
-            to you. If you choose a Pinterest Pin, we use it only for the
-            feature you requested. We do not publish anything to Pinterest
-            unless you choose to do so.
+            to you. Google Photos access is separate from Firebase sign-in;
+            we request access only to items you select in Picker. We use an
+            imported image only for the Pinboard feature you requested. We do
+            not modify or publish the original in Google Photos.
           </p>
           <p>
             When you request AI image editing, the relevant image and
@@ -70,7 +70,7 @@ function PrivacyPolicyPage() {
             .
           </p>
           <p>
-            We do not sell, rent, or use your images, Pinterest data, or
+            We do not sell, rent, or use your images, Google Photos data, or
             instructions for unrelated advertising. We do not use your content
             to train our own AI models.
           </p>
@@ -83,7 +83,11 @@ function PrivacyPolicyPage() {
             Images, audio, and creation information may be stored in our Google
             Firebase and Google Cloud services so we can provide saved
             creations and account features. Access tokens and other connection
-            data are used only to support the Pinterest features you authorize.
+            data are used only to support the Google Photos features you
+            authorize. Google Photos tokens are encrypted by the API before
+            they are stored and are not placed in the browser or returned to
+            the frontend. Imported images are validated and stored privately
+            with your Pinboard creation.
           </p>
           <p>
             We keep information for as long as needed to provide the service,
@@ -100,12 +104,12 @@ function PrivacyPolicyPage() {
           <p>
             We share information only as needed to operate features you ask
             for, including with Google services such as Firebase, Google Cloud,
-            and Gemini, and with Pinterest when you connect your account or
-            explicitly publish a creation. These providers process information
-            under their own applicable terms and privacy policies. We do not
-            share your information with data brokers or for third-party
-            advertising. Pinterest's privacy practices are described in its{' '}
-            <a href="https://policy.pinterest.com/en/privacy-policy" target="_blank" rel="noreferrer">
+            Google Photos, and Gemini to provide the features you request.
+            These providers process information under their own applicable
+            terms and privacy policies. We do not share your information with
+            data brokers or for third-party advertising. Google's privacy
+            practices are described in its{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">
               Privacy Policy
             </a>
             .
@@ -113,15 +117,16 @@ function PrivacyPolicyPage() {
         </section>
 
         <section aria-labelledby="privacy-controls">
-          <h2 id="privacy-controls">Your choices and Pinterest access</h2>
+          <h2 id="privacy-controls">Your choices and connected accounts</h2>
           <p>
-            You decide whether to connect Pinterest and which content to use.
-            You can disconnect or revoke Pinboard Studio's access in your
-            Pinterest account settings. Revoking access prevents future
-            Pinterest requests; contact us if you also want us to remove
-            information already saved by Pinboard Studio. You may also contact
-            us to request access to, correction of, or deletion of your
-            account information, subject to applicable law.
+            Connecting Google Photos is optional. You choose the items shared
+            with Pinboard and can disconnect from the photo workflow or revoke
+            access in your Google Account settings. Disconnecting revokes our
+            stored authorization and prevents future Picker requests; it does
+            not remove copies you already imported into Pinboard or delete the
+            original photos. Delete a Pinboard creation to remove its stored
+            media. You may also contact us to request access to, correction of,
+            or deletion of your account information, subject to applicable law.
           </p>
         </section>
 
