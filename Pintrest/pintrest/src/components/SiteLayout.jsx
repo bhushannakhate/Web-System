@@ -35,10 +35,7 @@ function SiteLayout() {
                 <li><NavLink className={navLinkClass} to="/privacy">Privacy</NavLink></li>
                 <li><NavLink className={navLinkClass} to="/customers">Customers</NavLink></li>
                 {user ? (
-                  <>
-                    <li><NavLink className={navLinkClass} to="/account">Account</NavLink></li>
-                    <li><NavLink className={navLinkClass} to="/studio">Studio</NavLink></li>
-                  </>
+                  <li><NavLink className={navLinkClass} to="/account">Account</NavLink></li>
                 ) : (
                   <>
                     <li><NavLink className={navLinkClass} to="/login">Sign in</NavLink></li>
@@ -70,4 +67,3 @@ function SiteLayout() {
 }
 
 export default SiteLayout
-

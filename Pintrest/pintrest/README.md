@@ -33,19 +33,23 @@ The Project 2 API provides Firebase-authenticated profile and creation endpoints
 | `POST` | `/api/creations` | Create a user-owned creation. |
 | `PATCH` | `/api/creations/:creationId` | Update an owned creation. |
 | `DELETE` | `/api/creations/:creationId` | Soft-delete an owned creation. |
+| `POST` | `/api/creations/:creationId/media/sourceImage/uploads` | Create a short-lived source-image upload. |
+| `POST` | `/api/creations/:creationId/media/uploads/:uploadId/complete` | Validate and attach a source image to the creation. |
 
 The UI obtains a fresh Firebase ID token before calling protected routes and sends it as a bearer token. The demo customer directory is retained at `/customers`; it is not part of the authenticated Firestore API.
 
+On the photo workflow, a signed-in user can select one JPEG, PNG, or WebP image up to 10 MB. Continuing creates a draft, uploads the image through the short-lived Cloud Storage URL, and asks the API to decode, normalize, and attach it. If upload or validation fails, the UI deletes the temporary draft and displays the error. The Google Photos Picker is not connected by this flow; Picker imports will use the same backend image-validation path when issue #19 is implemented.
+
 ## Application routes
 
-- `/` — Pinboard Studio landing page
+- `/` — Pinboard Studio photo workflow
 - `/about` — about Pinboard Studio
 - `/contact` — contact page
 - `/login` — Firebase email/password or Google sign-in
 - `/register` — Firebase account registration
 - `/forgot-password` — Firebase password reset email
 - `/account` — protected Firebase and Firestore account view
-- `/studio` — protected artwork form
+- `/studio` — legacy URL redirects to the current photo workflow
 - `/customers` — customer directory and CRUD form
 
 ## Run locally
