@@ -44,7 +44,7 @@ The Project 2 API provides Firebase-authenticated profile and creation endpoints
 | `POST` | `/api/creations/:creationId/google-photos/sessions/:sessionId/import` | Import one selected image through server validation and storage. |
 | `DELETE` | `/api/google-photos/sessions/:sessionId` | Cancel a Picker session. |
 
-The UI obtains a fresh Firebase ID token before calling protected routes and sends it as a bearer token. The demo customer directory is retained at `/customers`; it is not part of the authenticated Firestore API.
+The UI obtains a fresh Firebase ID token before calling protected routes and sends it as a bearer token. The demo customer directory is available at `/customers` only to verified Firebase accounts configured in the API's server-only `ADMIN_EMAILS` allowlist. Its API routes independently enforce administrator access; changing frontend state cannot grant access.
 
 On the photo workflow, a signed-in user can upload one JPEG, PNG, or WebP image up to 10 MB or separately connect Google Photos and choose items in Google's Picker. OAuth uses a distinct, server-managed authorization with only the Picker media-items scope; Firebase sign-in alone does not grant Photos access. The API binds each Picker session to the signed-in user and draft, polls using Google's recommended intervals, and offers only selected photos. When one photo is imported, the backend retrieves its temporary bytes and runs them through the same actual-byte validation, normalization, private storage, and cleanup lifecycle used by device uploads. Temporary Google Photos URLs are not shown to the browser or saved. The user can revoke the connection from the workflow. Sample photos remain local demo assets and are not Google Photos data.
 

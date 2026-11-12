@@ -1,9 +1,12 @@
+import { useContext } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
+import { AdminAccessContext } from '../auth/adminAccessContext'
 import { useAuth } from '../auth/useAuth'
 import './SiteLayout.css'
 
 function SiteLayout() {
   const { user } = useAuth()
+  const adminAccess = useContext(AdminAccessContext)
   const navLinkClass = ({ isActive }) => 'nav-link' + (isActive ? ' active' : '')
 
   return (
@@ -30,10 +33,6 @@ function SiteLayout() {
 
             <div className="collapse navbar-collapse justify-content-end ms-auto" id="primaryNavigation">
               <ul id="navBar" className="navbar-nav site-nav ms-auto">
-                <li><NavLink className={navLinkClass} to="/about">About</NavLink></li>
-                <li><NavLink className={navLinkClass} to="/contact">Contact</NavLink></li>
-                <li><NavLink className={navLinkClass} to="/privacy">Privacy</NavLink></li>
-                <li><NavLink className={navLinkClass} to="/customers">Customers</NavLink></li>
                 {user ? (
                   <li><NavLink className={navLinkClass} to="/account">Account</NavLink></li>
                 ) : (
@@ -57,7 +56,7 @@ function SiteLayout() {
             <NavLink to="/about">About</NavLink>
             <NavLink to="/contact">Contact</NavLink>
             <NavLink to="/privacy">Privacy</NavLink>
-            <NavLink to="/customers">Customers</NavLink>
+            {adminAccess.isAdmin && <NavLink to="/customers">Customers</NavLink>}
           </nav>
           <p className="footer-copyright">© {new Date().getFullYear()} Pinboard Studio</p>
         </div>

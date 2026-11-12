@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { AdminAccessContext } from '../auth/adminAccessContext'
 import { useAuth } from '../auth/useAuth'
 import {
   createGooglePhotosDraft,
@@ -93,6 +94,7 @@ function Icon({ name, size = 20 }) {
 
 function PhotoWorkflow() {
   const { user, signOut } = useAuth()
+  const { isAdmin } = useContext(AdminAccessContext)
   const [oauthResult] = useState(() =>
     new URLSearchParams(window.location.search).get('googlePhotos'),
   )
@@ -667,7 +669,7 @@ function PhotoWorkflow() {
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/privacy">Privacy</Link>
-          <Link to="/customers">Customers</Link>
+          {isAdmin && <Link to="/customers">Customers</Link>}
         </nav>
 
         <div className="workflow-account">
@@ -1062,7 +1064,7 @@ function PhotoWorkflow() {
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/privacy">Privacy</Link>
-          <Link to="/customers">Customers</Link>
+          {isAdmin && <Link to="/customers">Customers</Link>}
         </nav>
         <span>© {new Date().getFullYear()} Pinboard Studio</span>
       </footer>

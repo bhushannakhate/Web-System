@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useAuth } from '../auth/useAuth'
+import { apiRequest } from '../services/api'
 import './CustomersPage.css'
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 const CUSTOMER_FIELDS = {
   fullName: '',
   email: '',
@@ -13,22 +14,12 @@ const CUSTOMER_FIELDS = {
   marketingOptIn: false,
 }
 
-async function requestCustomers(path, options) {
-  let response
-  try {
-    response = await fetch(`${API_BASE_URL}/api${path}`, {
-      headers: { 'Content-Type': 'application/json', ...options?.headers },
-      ...options,
-    })
-  } catch {
-    throw new Error('Could not reach the customer API. Check that the backend is running and allows this website origin.')
-  }
-  const payload = await response.json().catch(() => ({}))
-  if (!response.ok) throw new Error(payload.error || 'The customer service could not complete the request.')
-  return payload
+function requestCustomers(path, user, options) {
+  return apiRequest(`/demo/customers${path}`, user, options)
 }
 
 function CustomersPage() {
+  const { user } = useAuth()
   const [customers, setCustomers] = useState([])
   const [form, setForm] = useState(CUSTOMER_FIELDS)
   const [loading, setLoading] = useState(true)
@@ -42,18 +33,18 @@ function CustomersPage() {
     setLoading(true)
     setError('')
     try {
-      const payload = await requestCustomers('/customers?limit=10')
+      const payload = await requestCustomers('?limit=10', user)
       setCustomers(payload.customers)
     } catch (loadError) {
       setError(loadError.message)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [user])
 
   useEffect(() => {
     let ignoreResult = false
-    requestCustomers('/customers?limit=10')
+    requestCustomers('?limit=10', user)
       .then((payload) => {
         if (!ignoreResult) setCustomers(payload.customers)
       })
@@ -67,7 +58,7 @@ function CustomersPage() {
     return () => {
       ignoreResult = true
     }
-  }, [])
+  }, [user])
 
   function handleChange(event) {
     const { name, value, checked, type } = event.target
@@ -100,7 +91,7 @@ function CustomersPage() {
     setError('')
     setNotice('')
     try {
-      await requestCustomers(`/customers/${encodeURIComponent(customer.id)}`, { method: 'DELETE' })
+      await requestCustomers(`/${encodeURIComponent(customer.id)}`, user, { method: 'DELETE' })
       if (editingCustomer?.id === customer.id) handleCancelEdit()
       setNotice(`${customer.fullName} was deleted.`)
       await loadCustomers()
@@ -117,7 +108,7 @@ function CustomersPage() {
     setError('')
     setNotice('')
     try {
-      await requestCustomers(editingCustomer ? `/customers/${encodeURIComponent(editingCustomer.id)}` : '/customers', {
+      await requestCustomers(editingCustomer ? `/${encodeURIComponent(editingCustomer.id)}` : '', user, {
         method: editingCustomer ? 'PATCH' : 'POST',
         body: JSON.stringify({
           ...form,
