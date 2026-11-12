@@ -369,7 +369,7 @@
 
 .photo-choice-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: .85rem;
 }
 
@@ -392,6 +392,99 @@
   border-color: #9bbdf0;
   box-shadow: 0 9px 24px rgba(40, 108, 211, .1);
   transform: translateY(-2px);
+}
+
+.google-photos-disclosure {
+  margin: .85rem 0;
+  color: var(--wf-muted);
+  font-size: .68rem;
+  line-height: 1.55;
+}
+
+.google-photos-disclosure a {
+  color: var(--wf-blue);
+}
+
+.google-photos-status,
+.google-photos-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.google-photos-status {
+  margin: .8rem 0;
+  padding: .8rem 1rem;
+  border: 1px solid var(--wf-line);
+  border-radius: 12px;
+  color: var(--wf-muted);
+  font-size: .75rem;
+}
+
+.google-photos-items {
+  display: grid;
+  gap: .5rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  border: 1px solid var(--wf-line);
+  border-radius: 15px;
+  background: var(--wf-paper);
+}
+
+.google-photos-item {
+  width: 100%;
+  padding: .8rem;
+  border: 1px solid var(--wf-line);
+  border-radius: 11px;
+  background: var(--wf-soft);
+  color: var(--wf-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.google-photos-item > span:first-child {
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #e9f1fc;
+  color: var(--wf-blue);
+}
+
+.google-photos-item > span:nth-child(2) {
+  display: grid;
+  flex: 1;
+  gap: .2rem;
+  min-width: 0;
+}
+
+.google-photos-item strong,
+.google-photos-item small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.google-photos-item strong {
+  font-size: .75rem;
+}
+
+.google-photos-item small,
+.google-photos-item > span:last-child {
+  color: var(--wf-muted);
+  font-size: .65rem;
+}
+
+.google-photos-item:hover:not(:disabled) {
+  border-color: #9bbdf0;
+}
+
+.google-photos-item:disabled {
+  cursor: wait;
+  opacity: .7;
 }
 
 .photo-choice-icon {
@@ -1127,6 +1220,9 @@
 
 .workflow-dark .sample-library,
 .workflow-dark .sample-photo,
+.workflow-dark .google-photos-items,
+.workflow-dark .google-photos-status,
+.workflow-dark .google-photos-item,
 .workflow-dark .workflow-card-footer {
   border-color: #39475b;
   background: #202a39;
@@ -1141,12 +1237,21 @@
 
 .workflow-dark .photo-choice small,
 .workflow-dark .sample-library-heading span:not(.sample-badge),
+.workflow-dark .google-photos-status,
+.workflow-dark .google-photos-item small,
+.workflow-dark .google-photos-item > span:last-child,
+.workflow-dark .google-photos-disclosure,
 .workflow-dark .photo-preview-details > p:not(.workflow-kicker),
 .workflow-dark .direction-preview > p:not(.workflow-kicker),
 .workflow-dark .audio-panel-heading small,
 .workflow-dark .review-prompt,
 .workflow-dark .draft-status {
   color: #a8b4c5;
+}
+
+.workflow-dark .google-photos-item > span:first-child {
+  background: #263b57;
+  color: #9dc2f8;
 }
 
 .workflow-dark .workflow-textarea {
@@ -1355,4 +1460,3 @@
     transition-duration: .01ms !important;
   }
 }
-

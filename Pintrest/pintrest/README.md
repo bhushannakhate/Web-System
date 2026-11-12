@@ -35,10 +35,18 @@ The Project 2 API provides Firebase-authenticated profile and creation endpoints
 | `DELETE` | `/api/creations/:creationId` | Soft-delete an owned creation. |
 | `POST` | `/api/creations/:creationId/media/sourceImage/uploads` | Create a short-lived source-image upload. |
 | `POST` | `/api/creations/:creationId/media/uploads/:uploadId/complete` | Validate and attach a source image to the creation. |
+| `GET` | `/api/google-photos/connection` | Read the signed-in user's Google Photos connection status. |
+| `POST` | `/api/google-photos/oauth/authorize` | Start the separate Google Photos OAuth consent flow. |
+| `DELETE` | `/api/google-photos/connection` | Revoke and disconnect Google Photos. |
+| `POST` | `/api/creations/:creationId/google-photos/sessions` | Start an owner-bound Picker session for a draft. |
+| `GET` | `/api/google-photos/sessions/:sessionId` | Poll the Picker session. |
+| `GET` | `/api/google-photos/sessions/:sessionId/media-items` | List items explicitly selected in that Picker session. |
+| `POST` | `/api/creations/:creationId/google-photos/sessions/:sessionId/import` | Import one selected image through server validation and storage. |
+| `DELETE` | `/api/google-photos/sessions/:sessionId` | Cancel a Picker session. |
 
 The UI obtains a fresh Firebase ID token before calling protected routes and sends it as a bearer token. The demo customer directory is retained at `/customers`; it is not part of the authenticated Firestore API.
 
-On the photo workflow, a signed-in user can select one JPEG, PNG, or WebP image up to 10 MB. Continuing creates a draft, uploads the image through the short-lived Cloud Storage URL, and asks the API to decode, normalize, and attach it. If upload or validation fails, the UI deletes the temporary draft and displays the error. The Google Photos Picker is not connected by this flow; Picker imports will use the same backend image-validation path when issue #19 is implemented.
+On the photo workflow, a signed-in user can upload one JPEG, PNG, or WebP image up to 10 MB or separately connect Google Photos and choose items in Google's Picker. OAuth uses a distinct, server-managed authorization with only the Picker media-items scope; Firebase sign-in alone does not grant Photos access. The API binds each Picker session to the signed-in user and draft, polls using Google's recommended intervals, and offers only selected photos. When one photo is imported, the backend retrieves its temporary bytes and runs them through the same actual-byte validation, normalization, private storage, and cleanup lifecycle used by device uploads. Temporary Google Photos URLs are not shown to the browser or saved. The user can revoke the connection from the workflow. Sample photos remain local demo assets and are not Google Photos data.
 
 ## Application routes
 
@@ -60,6 +68,8 @@ npm run dev
 ```
 
 Copy `.env.example` to `.env.local` and fill in the Firebase Web App values from Firebase Console → Project settings → Your apps. The client API key and app ID are Firebase web configuration, not service-account credentials; never put a service-account JSON in this frontend. Enable Email/Password and Google under Firebase Authentication → Sign-in method. The default Firebase Hosting domain is authorized automatically.
+
+Google Photos OAuth credentials and the token-encryption key are API-only settings. Configure the OAuth callback URI and Picker API in Google Cloud, then set the server-side `GOOGLE_PHOTOS_*` variables described in the Project 2 API README. Never add those secrets to `VITE_*` variables. Google OAuth callback results return to the frontend origin that initiated the connection.
 
 Set `VITE_API_BASE_URL` to the API base URL:
 

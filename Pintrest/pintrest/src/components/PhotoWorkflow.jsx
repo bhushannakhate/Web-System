@@ -1,6 +1,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
+import {
+  createGooglePhotosDraft,
+  createGooglePhotosPickerSession,
+  deleteGooglePhotosDraft,
+  deleteGooglePhotosPickerSession,
+  disconnectGooglePhotos,
+  getGooglePhotosAuthorizationUrl,
+  getGooglePhotosConnection,
+  importGooglePhotosItem,
+  listGooglePhotosPickerItems,
+  pollGooglePhotosPickerSession,
+} from '../services/googlePhotos'
 import { deleteUploadedCreation, uploadSourceImage } from '../services/mediaUpload'
 import './PhotoWorkflow.css'
 
@@ -33,6 +45,11 @@ const samplePhotos = [
 
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
+
+function googleDurationMs(value, fallback) {
+  const seconds = Number.parseFloat(String(value || ''))
+  return Number.isFinite(seconds) ? Math.max(0, seconds * 1000) : fallback
+}
 
 const steps = [
   { number: 1, label: 'Choose a photo' },
@@ -76,10 +93,19 @@ function Icon({ name, size = 20 }) {
 
 function PhotoWorkflow() {
   const { user, signOut } = useAuth()
+  const [oauthResult] = useState(() =>
+    new URLSearchParams(window.location.search).get('googlePhotos'),
+  )
   const [step, setStep] = useState(1)
   const [selectedPhoto, setSelectedPhoto] = useState(null)
   const [showSamples, setShowSamples] = useState(false)
-  const [photoError, setPhotoError] = useState('')
+  const [photoError, setPhotoError] = useState(() => {
+    if (oauthResult === 'denied') {
+      return 'Google Photos connection was cancelled. You can connect when you are ready.'
+    }
+    if (oauthResult === 'error') return 'Google Photos could not connect. Please try again.'
+    return ''
+  })
   const [prompt, setPrompt] = useState('')
   const [audioUrl, setAudioUrl] = useState('')
   const [audioName, setAudioName] = useState('')
@@ -88,8 +114,18 @@ function PhotoWorkflow() {
   const [isRequestingMic, setIsRequestingMic] = useState(false)
   const [recordingSeconds, setRecordingSeconds] = useState(0)
   const [isDark, setIsDark] = useState(false)
-  const [notice, setNotice] = useState('')
+  const [notice, setNotice] = useState(() =>
+    oauthResult === 'connected'
+      ? 'Google Photos is connected. Choose a photo to import.'
+      : '',
+  )
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
+  const [googlePhotosConnected, setGooglePhotosConnected] = useState(
+    oauthResult === 'connected',
+  )
+  const [googlePhotosItems, setGooglePhotosItems] = useState([])
+  const [isPickingGooglePhotos, setIsPickingGooglePhotos] = useState(false)
+  const [isImportingGooglePhoto, setIsImportingGooglePhoto] = useState(false)
   const photoInputRef = useRef(null)
   const audioInputRef = useRef(null)
   const photoUrlRef = useRef('')
@@ -100,11 +136,18 @@ function PhotoWorkflow() {
   const timerRef = useRef(null)
   const recordingSecondsRef = useRef(0)
   const mountedRef = useRef(false)
+  const pickerCancelledRef = useRef(false)
+  const pickerWindowRef = useRef(null)
+  const pickerStateRef = useRef(null)
 
   useEffect(() => {
     mountedRef.current = true
+    if (oauthResult) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
     return () => {
       mountedRef.current = false
+      pickerCancelledRef.current = true
       window.clearInterval(timerRef.current)
       if (recorderRef.current && recorderRef.current.state !== 'inactive') {
         recorderRef.current.stop()
@@ -113,9 +156,216 @@ function PhotoWorkflow() {
       if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
       if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
     }
-  }, [])
+  }, [oauthResult])
+
+  async function clearGooglePhotosSelection() {
+    const pending = pickerStateRef.current
+    pickerCancelledRef.current = true
+    pickerWindowRef.current?.close()
+    pickerWindowRef.current = null
+    pickerStateRef.current = null
+    setGooglePhotosItems([])
+    setIsPickingGooglePhotos(false)
+    if (!pending) return
+
+    let cleanupError
+    if (pending.sessionId) {
+      try {
+        await deleteGooglePhotosPickerSession(pending.sessionId, user)
+      } catch (error) {
+        cleanupError = error
+      }
+    }
+    if (pending.creationId) {
+      try {
+        await deleteGooglePhotosDraft(pending.creationId, user)
+      } catch (error) {
+        cleanupError ||= error
+      }
+    }
+    if (cleanupError) throw cleanupError
+  }
+
+  async function cancelGooglePhotosSelection() {
+    try {
+      await clearGooglePhotosSelection()
+      setPhotoError('')
+      setNotice('Google Photos selection cancelled.')
+    } catch (error) {
+      setPhotoError(error.message)
+    }
+  }
+
+  async function chooseGooglePhotos() {
+    if (!user) {
+      setPhotoError('Sign in before connecting Google Photos.')
+      return
+    }
+    if (isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto) return
+
+    const pickerWindow = window.open('about:blank', '_blank')
+    if (!pickerWindow) {
+      setPhotoError('Allow pop-ups to open Google Photos, then try again.')
+      return
+    }
+    pickerWindowRef.current = pickerWindow
+    setIsUploadingPhoto(true)
+    setPhotoError('')
+    setNotice('')
+    try {
+      const connection = await getGooglePhotosConnection(user)
+      setGooglePhotosConnected(connection.connected)
+      if (!connection.connected) {
+        pickerWindow.close()
+        pickerWindowRef.current = null
+        const { authorizationUrl } = await getGooglePhotosAuthorizationUrl(user)
+        window.location.assign(authorizationUrl)
+        return
+      }
+      if (selectedPhoto?.creationId) {
+        await deleteUploadedCreation(selectedPhoto.creationId, user)
+      }
+      if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
+      photoUrlRef.current = ''
+      setSelectedPhoto(null)
+      const creation = await createGooglePhotosDraft(user)
+      pickerStateRef.current = { creationId: creation.id, sessionId: null }
+      const session = await createGooglePhotosPickerSession(creation.id, user)
+      pickerStateRef.current = { creationId: creation.id, sessionId: session.sessionId }
+      pickerCancelledRef.current = false
+      pickerWindow.opener = null
+      pickerWindow.location.assign(session.pickerUri)
+      setIsPickingGooglePhotos(true)
+      setNotice('Choose photos in the Google Photos tab. We will check for your selection here.')
+      setIsUploadingPhoto(false)
+
+      const recommendedInterval = googleDurationMs(
+        session.pollingConfig?.pollInterval,
+        3000,
+      )
+      const interval = recommendedInterval >= 1000 ? recommendedInterval : 3000
+      const timeout = googleDurationMs(session.pollingConfig?.timeoutIn, 300000)
+      const deadline = Date.now() + timeout
+      while (!pickerCancelledRef.current && Date.now() < deadline) {
+        await new Promise((resolve) => window.setTimeout(resolve, interval))
+        if (pickerCancelledRef.current) return
+        const status = await pollGooglePhotosPickerSession(session.sessionId, user)
+        if (pickerCancelledRef.current) return
+        if (status.mediaItemsSet) {
+          const { mediaItems } = await listGooglePhotosPickerItems(session.sessionId, user)
+          if (pickerCancelledRef.current) return
+          if (!mediaItems.length) {
+            throw new Error('No supported photos were selected. Choose a JPEG, PNG, or WebP photo and retry.')
+          }
+          pickerWindow.close()
+          pickerWindowRef.current = null
+          setGooglePhotosItems(mediaItems)
+          setIsPickingGooglePhotos(false)
+          setNotice('Choose one selected photo to import into your private Pinboard draft.')
+          return
+        }
+      }
+      if (!pickerCancelledRef.current) {
+        throw new Error('The Google Photos selection timed out. Start a new selection and try again.')
+      }
+    } catch (error) {
+      pickerWindowRef.current?.close()
+      pickerWindowRef.current = null
+      const pending = pickerStateRef.current
+      pickerStateRef.current = null
+      setGooglePhotosItems([])
+      setIsPickingGooglePhotos(false)
+      let cleanupFailed = false
+      if (pending?.sessionId) {
+        try {
+          await deleteGooglePhotosPickerSession(pending.sessionId, user)
+        } catch {
+          cleanupFailed = true
+        }
+      }
+      if (pending?.creationId) {
+        try {
+          await deleteGooglePhotosDraft(pending.creationId, user)
+        } catch {
+          cleanupFailed = true
+        }
+      }
+      setPhotoError(
+        cleanupFailed
+          ? `${error.message} The temporary selection could not be fully cleaned up; contact support.`
+          : error.message,
+      )
+    } finally {
+      if (mountedRef.current) setIsUploadingPhoto(false)
+    }
+  }
+
+  async function importGooglePhoto(item) {
+    const pending = pickerStateRef.current
+    if (!pending?.creationId || !pending.sessionId) {
+      setPhotoError('Start a new Google Photos selection and choose a photo.')
+      return
+    }
+    setIsImportingGooglePhoto(true)
+    setPhotoError('')
+    try {
+      const { media, downloadUrl } = await importGooglePhotosItem(
+        pending.creationId,
+        pending.sessionId,
+        item.id,
+        user,
+      )
+      setSelectedPhoto({
+        id: item.id,
+        name: item.filename,
+        alt: `Selected Google Photos image: ${item.filename}`,
+        src: downloadUrl,
+        source: 'google-photos',
+        creationId: pending.creationId,
+        media,
+      })
+      pickerStateRef.current = null
+      setGooglePhotosItems([])
+      setNotice('Your selected photo was validated and imported to private storage.')
+    } catch (error) {
+      const creationId = pending.creationId
+      pickerStateRef.current = null
+      setGooglePhotosItems([])
+      try {
+        await deleteGooglePhotosDraft(creationId, user)
+      } catch {
+        setPhotoError(`${error.message} The temporary draft could not be cleaned up; contact support.`)
+        return
+      }
+      setPhotoError(error.message)
+    } finally {
+      setIsImportingGooglePhoto(false)
+    }
+  }
+
+  async function handleGooglePhotosDisconnect() {
+    setIsUploadingPhoto(true)
+    setPhotoError('')
+    try {
+      await disconnectGooglePhotos(user)
+      setGooglePhotosConnected(false)
+      setNotice('Google Photos has been disconnected.')
+    } catch (error) {
+      setPhotoError(error.message)
+    } finally {
+      setIsUploadingPhoto(false)
+    }
+  }
 
   async function chooseSample(photo) {
+    if (pickerStateRef.current) {
+      try {
+        await clearGooglePhotosSelection()
+      } catch (error) {
+        setPhotoError(error.message)
+        return
+      }
+    }
     if (selectedPhoto?.creationId) {
       setIsUploadingPhoto(true)
       try {
@@ -151,6 +401,14 @@ function PhotoWorkflow() {
     if (file.size > MAX_IMAGE_SIZE) {
       setPhotoError('That photo is larger than 10 MB. Choose a smaller file.')
       return
+    }
+    if (pickerStateRef.current) {
+      try {
+        await clearGooglePhotosSelection()
+      } catch (error) {
+        setPhotoError(error.message)
+        return
+      }
     }
     if (selectedPhoto?.creationId) {
       setIsUploadingPhoto(true)
@@ -483,7 +741,7 @@ function PhotoWorkflow() {
                   className="photo-choice"
                   type="button"
                   onClick={() => photoInputRef.current?.click()}
-                  disabled={isUploadingPhoto}
+                  disabled={isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto}
                 >
                   <span className="photo-choice-icon"><Icon name="upload" size={22} /></span>
                   <strong>Upload from your device</strong>
@@ -491,14 +749,25 @@ function PhotoWorkflow() {
                   <span className="photo-choice-action">Choose a file <Icon name="arrow" size={15} /></span>
                 </button>
                 <button
+                  className="photo-choice google-photos-choice"
+                  type="button"
+                  onClick={() => void chooseGooglePhotos()}
+                  disabled={isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto}
+                >
+                  <span className="photo-choice-icon google-mark" aria-hidden="true">G</span>
+                  <strong>{googlePhotosConnected ? 'Choose from Google Photos' : 'Connect Google Photos'}</strong>
+                  <small>{isPickingGooglePhotos ? 'Waiting for your selection…' : 'Choose only the photos you want to import.'}</small>
+                  <span className="photo-choice-action">{isPickingGooglePhotos ? 'Picker is open' : 'Open Google Photos Picker'} <Icon name="arrow" size={15} /></span>
+                </button>
+                <button
                   className={'photo-choice sample-choice' + (showSamples ? ' is-active' : '')}
                   type="button"
                   onClick={() => setShowSamples((value) => !value)}
-                  disabled={isUploadingPhoto}
+                  disabled={isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto}
                 >
-                  <span className="photo-choice-icon google-mark" aria-hidden="true">G</span>
+                  <span className="photo-choice-icon"><Icon name="photo" size={22} /></span>
                   <strong>Explore sample photos</strong>
-                  <small>Google Photos Picker connection is not configured yet.</small>
+                  <small>Preview demo images without connecting an account.</small>
                   <span className="photo-choice-action">{showSamples ? 'Hide sample library' : 'Preview sample library'} <Icon name="arrow" size={15} /></span>
                 </button>
                 <input
@@ -510,6 +779,57 @@ function PhotoWorkflow() {
                   aria-label="Choose a photo from your device"
                 />
               </div>
+
+              <p className="google-photos-disclosure">
+                Google Photos access is optional and limited to the photos you select. Imported copies are validated and stored privately in your Pinboard draft. See the <Link to="/privacy">Privacy Policy</Link>.
+              </p>
+              {googlePhotosConnected && (
+                <button
+                  className="workflow-link-button"
+                  type="button"
+                  onClick={() => void handleGooglePhotosDisconnect()}
+                  disabled={isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto}
+                >
+                  Disconnect Google Photos
+                </button>
+              )}
+              {isPickingGooglePhotos && (
+                <div className="google-photos-status" role="status">
+                  <span>Waiting for you to finish in the Google Photos tab.</span>
+                  <button className="workflow-link-button" type="button" onClick={() => void cancelGooglePhotosSelection()}>
+                    Cancel selection
+                  </button>
+                </div>
+              )}
+              {googlePhotosItems.length > 0 && (
+                <div className="google-photos-items" aria-label="Selected Google Photos images">
+                  <div className="sample-library-heading">
+                    <div>
+                      <strong>Select one photo to import</strong>
+                      <span>Only items selected in this Picker session are available.</span>
+                    </div>
+                    <button className="workflow-link-button" type="button" onClick={() => void cancelGooglePhotosSelection()} disabled={isImportingGooglePhoto}>
+                      Cancel
+                    </button>
+                  </div>
+                  {googlePhotosItems.map((item) => (
+                    <button
+                      className="google-photos-item"
+                      key={item.id}
+                      type="button"
+                      onClick={() => void importGooglePhoto(item)}
+                      disabled={isImportingGooglePhoto}
+                    >
+                      <span><Icon name="photo" size={18} /></span>
+                      <span>
+                        <strong>{item.filename}</strong>
+                        <small>{item.width && item.height ? `${item.width} × ${item.height} · ` : ''}{item.mimeType}</small>
+                      </span>
+                      <span>{isImportingGooglePhoto ? 'Importing…' : 'Import'}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
 
               {showSamples && (
                 <div className="sample-library">
@@ -553,7 +873,7 @@ function PhotoWorkflow() {
                 <div className="photo-preview-details">
                   <p className="workflow-kicker">YOUR STARTING POINT</p>
                   <h3>{selectedPhoto ? selectedPhoto.name : 'Nothing selected yet'}</h3>
-                  <p>                  {selectedPhoto ? (selectedPhoto.media ? 'Uploaded securely to your account.' : selectedIsLocal ? 'Selected from this device.' : 'Sample image for exploring the workflow.') : 'Choose a local photo or preview one of the sample images.'}</p>
+                  <p>{selectedPhoto ? (selectedPhoto.media ? 'Stored privately with your account.' : selectedIsLocal ? 'Selected from this device.' : 'Sample image for exploring the workflow.') : 'Choose a local photo, Google Photos image, or sample.'}</p>
                   {selectedPhoto && (
                     <button className="workflow-link-button" type="button" onClick={() => void removeSelectedPhoto()} disabled={isUploadingPhoto}>
                       {isUploadingPhoto ? 'Working…' : 'Remove photo'}
@@ -641,7 +961,7 @@ function PhotoWorkflow() {
                   <div className="direction-photo"><img src={selectedPhoto.src} alt={selectedPhoto.alt} /></div>
                   <p className="workflow-kicker">PHOTO IN THIS DRAFT</p>
                   <strong>{selectedPhoto.name}</strong>
-                  <p>{selectedPhoto.source === 'device' ? 'Local image preview' : 'Sample image preview'}</p>
+                  <p>{selectedPhoto.source === 'device' ? 'Local image preview' : selectedPhoto.source === 'google-photos' ? 'Imported from your selected Google Photos items' : 'Sample image preview'}</p>
                   <div className="draft-note"><Icon name="spark" size={16} /> Your photo and voice note are not sent to a processing service by this screen.</div>
                 </aside>
               </div>
