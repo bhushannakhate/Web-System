@@ -666,9 +666,6 @@ function PhotoWorkflow() {
         </Link>
 
         <nav className="workflow-nav" aria-label="Main navigation">
-          <Link to="/about">About</Link>
-          <Link to="/contact">Contact</Link>
-          <Link to="/privacy">Privacy</Link>
           {isAdmin && <Link to="/customers">Customers</Link>}
         </nav>
 
