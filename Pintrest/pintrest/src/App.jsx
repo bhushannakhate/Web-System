@@ -5,6 +5,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import LoginPage from './pages/LoginPage'
 import CustomersPage from './pages/CustomersPage'
 import AccountPage from './pages/AccountPage'
+import CreationDetailPage from './pages/CreationDetailPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import RegisterPage from './pages/RegisterPage'
 import PhotoWorkflow from './components/PhotoWorkflow'
@@ -31,6 +32,7 @@ function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path="/account" element={<AccountPage />} />
+              <Route path="/account/creations/:creationId" element={<CreationDetailPage />} />
               <Route element={<AdminRoute />}>
                 <Route path="/customers" element={<CustomersPage />} />
               </Route>
