@@ -15,6 +15,11 @@ import {
   pollGooglePhotosPickerSession,
 } from '../services/googlePhotos'
 import { deleteUploadedCreation, uploadSourceImage } from '../services/mediaUpload'
+import {
+  getGeneratedImageUrl,
+  runAgentWorkflow,
+  uploadCreationAudio,
+} from '../services/agentWorkflow'
 import './PhotoWorkflow.css'
 
 const samplePhotos = [
@@ -110,8 +115,13 @@ function PhotoWorkflow() {
   })
   const [prompt, setPrompt] = useState('')
   const [audioUrl, setAudioUrl] = useState('')
+  const [audioFile, setAudioFile] = useState(null)
   const [audioName, setAudioName] = useState('')
   const [audioError, setAudioError] = useState('')
+  const [workflowError, setWorkflowError] = useState('')
+  const [generatedPhotoUrl, setGeneratedPhotoUrl] = useState('')
+  const [agentResult, setAgentResult] = useState(null)
+  const [isRunningAgent, setIsRunningAgent] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [isRequestingMic, setIsRequestingMic] = useState(false)
   const [recordingSeconds, setRecordingSeconds] = useState(0)
@@ -132,6 +142,7 @@ function PhotoWorkflow() {
   const audioInputRef = useRef(null)
   const photoUrlRef = useRef('')
   const audioUrlRef = useRef('')
+  const audioUploadRef = useRef(null)
   const recorderRef = useRef(null)
   const streamRef = useRef(null)
   const chunksRef = useRef([])
@@ -230,6 +241,7 @@ function PhotoWorkflow() {
       if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
       photoUrlRef.current = ''
       setSelectedPhoto(null)
+      clearAgentResult()
       const creation = await createGooglePhotosDraft(user)
       pickerStateRef.current = { creationId: creation.id, sessionId: null }
       const session = await createGooglePhotosPickerSession(creation.id, user)
@@ -326,6 +338,7 @@ function PhotoWorkflow() {
         creationId: pending.creationId,
         media,
       })
+      clearAgentResult()
       pickerStateRef.current = null
       setGooglePhotosItems([])
       setNotice('Your selected photo was validated and imported to private storage.')
@@ -384,6 +397,7 @@ function PhotoWorkflow() {
       photoUrlRef.current = ''
     }
     setSelectedPhoto(photo)
+    clearAgentResult()
     setShowSamples(true)
     setPhotoError('')
     setNotice('')
@@ -434,6 +448,7 @@ function PhotoWorkflow() {
       file,
       source: 'device',
     })
+    clearAgentResult()
     setShowSamples(false)
     setNotice('')
   }
@@ -442,7 +457,17 @@ function PhotoWorkflow() {
     if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
     audioUrlRef.current = ''
     setAudioUrl('')
+    setAudioFile(null)
     setAudioName('')
+    audioUploadRef.current = null
+    setGeneratedPhotoUrl('')
+    setAgentResult(null)
+  }
+
+  function clearAgentResult() {
+    setGeneratedPhotoUrl('')
+    setAgentResult(null)
+    setWorkflowError('')
   }
 
   function useAudioFile(event) {
@@ -450,8 +475,25 @@ function PhotoWorkflow() {
     event.target.value = ''
     setAudioError('')
     if (!file) return
-    if (!file.type.startsWith('audio/')) {
-      setAudioError('Choose an audio file to add a voice note.')
+    const typeByExtension = {
+      mp3: 'audio/mpeg',
+      m4a: 'audio/mp4',
+      mp4: 'audio/mp4',
+      ogg: 'audio/ogg',
+      oga: 'audio/ogg',
+      wav: 'audio/wav',
+      webm: 'audio/webm',
+    }
+    const extension = file.name.toLowerCase().split('.').pop()
+    const contentType = typeByExtension[extension] || file.type.split(';')[0]
+    if (![
+      'audio/mpeg',
+      'audio/mp4',
+      'audio/ogg',
+      'audio/wav',
+      'audio/webm',
+    ].includes(contentType)) {
+      setAudioError('Choose an MP3, M4A, OGG, WAV, or WebM audio file.')
       return
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -464,9 +506,11 @@ function PhotoWorkflow() {
     window.clearInterval(timerRef.current)
     setIsRecording(false)
     clearAudio()
-    const url = URL.createObjectURL(file)
+    const normalizedFile = new File([file], file.name, { type: contentType })
+    const url = URL.createObjectURL(normalizedFile)
     audioUrlRef.current = url
     setAudioUrl(url)
+    setAudioFile(normalizedFile)
     setAudioName(file.name)
   }
 
@@ -516,11 +560,21 @@ function PhotoWorkflow() {
           type: recorder.mimeType || 'audio/webm',
         })
         if (mountedRef.current && blob.size) {
-          const url = URL.createObjectURL(blob)
-          if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
-          audioUrlRef.current = url
-          setAudioUrl(url)
-          setAudioName('Voice note (' + formatTime(recordingSecondsRef.current) + ')')
+          const contentType = blob.type.split(';')[0]
+          if (!['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'].includes(contentType)) {
+            setAudioError('This browser recorded an unsupported audio format. Upload an MP3, M4A, OGG, WAV, or WebM file instead.')
+          } else if (blob.size > 20 * 1024 * 1024) {
+            setAudioError('That recording is larger than 20 MB. Record a shorter note and try again.')
+          } else {
+            const extension = contentType === 'audio/mp4' ? 'm4a' : contentType.slice(6)
+            const file = new File([blob], `voice-note.${extension}`, { type: contentType })
+            const url = URL.createObjectURL(file)
+            if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
+            audioUrlRef.current = url
+            setAudioUrl(url)
+            setAudioFile(file)
+            setAudioName('Voice note (' + formatTime(recordingSecondsRef.current) + ')')
+          }
         }
         stream.getTracks().forEach((track) => track.stop())
         if (streamRef.current === stream) streamRef.current = null
@@ -553,6 +607,7 @@ function PhotoWorkflow() {
   }
 
   function moveToStep(nextStep) {
+    if (isRunningAgent) return
     if (nextStep < 1 || nextStep > 3) return
     if (nextStep > 1 && !selectedPhoto) {
       setPhotoError('Choose a photo before continuing.')
@@ -595,6 +650,55 @@ function PhotoWorkflow() {
     moveToStep(step + 1)
   }
 
+  async function createWithAgents() {
+    if (!user) {
+      setWorkflowError('Sign in before running the agents.')
+      return
+    }
+    if (!selectedPhoto?.creationId) {
+      setWorkflowError('Choose a device photo or import a Google Photos image. Sample previews are not stored in your private creation.')
+      return
+    }
+    if (!audioFile) {
+      setWorkflowError('Add a voice note or audio file before running the agents.')
+      return
+    }
+
+    setIsRunningAgent(true)
+    setWorkflowError('')
+    setNotice('Uploading your voice note and running the image agents. This can take a few minutes.')
+    try {
+      if (
+        audioUploadRef.current?.creationId !== selectedPhoto.creationId ||
+        audioUploadRef.current?.audioFile !== audioFile
+      ) {
+        await uploadCreationAudio(selectedPhoto.creationId, audioFile, user)
+        audioUploadRef.current = {
+          creationId: selectedPhoto.creationId,
+          audioFile,
+        }
+      }
+
+      const result = await runAgentWorkflow(
+        selectedPhoto.creationId,
+        prompt.trim(),
+        user,
+      )
+      const outputUrl = await getGeneratedImageUrl(
+        selectedPhoto.creationId,
+        user,
+      )
+      setGeneratedPhotoUrl(outputUrl)
+      setAgentResult(result.creation?.agentWorkflow || null)
+      setNotice('The agents completed their review and saved the generated image to your private creation.')
+    } catch (error) {
+      setWorkflowError(error.message)
+      setNotice('')
+    } finally {
+      setIsRunningAgent(false)
+    }
+  }
+
   async function removeSelectedPhoto() {
     if (!selectedPhoto) return
     if (selectedPhoto.creationId) {
@@ -614,18 +718,22 @@ function PhotoWorkflow() {
       photoUrlRef.current = ''
     }
     setSelectedPhoto(null)
+    clearAgentResult()
     setPhotoError('')
   }
 
   async function downloadPhoto() {
     if (!selectedPhoto) return
     setNotice('')
+    const photoUrl = generatedPhotoUrl || selectedPhoto.src
     const anchor = document.createElement('a')
-    anchor.download = 'pinboard-studio-' + selectedPhoto.name.replace(/[^a-z0-9._-]+/gi, '-')
+    anchor.download = 'pinboard-studio-' +
+      (generatedPhotoUrl ? 'generated-' : '') +
+      selectedPhoto.name.replace(/[^a-z0-9._-]+/gi, '-')
     anchor.rel = 'noreferrer'
 
     try {
-      const response = await fetch(selectedPhoto.src)
+      const response = await fetch(photoUrl)
       if (!response.ok) throw new Error('Download failed')
       const blob = await response.blob()
       const downloadUrl = URL.createObjectURL(blob)
@@ -633,7 +741,7 @@ function PhotoWorkflow() {
       anchor.click()
       window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000)
     } catch {
-      anchor.href = selectedPhoto.src
+      anchor.href = photoUrl
       anchor.target = '_blank'
       anchor.click()
       setNotice('The photo opened in a new tab because this source does not allow direct downloads.')
@@ -903,7 +1011,11 @@ function PhotoWorkflow() {
                     id="photo-prompt"
                     className="workflow-textarea"
                     value={prompt}
-                    onChange={(event) => setPrompt(event.target.value)}
+                    onChange={(event) => {
+                      setPrompt(event.target.value)
+                      setGeneratedPhotoUrl('')
+                      setAgentResult(null)
+                    }}
                     maxLength={1000}
                     placeholder="For example: soften the afternoon light, keep the colors natural, and give it a quiet editorial feel..."
                     rows={6}
@@ -939,7 +1051,7 @@ function PhotoWorkflow() {
                         ref={audioInputRef}
                         className="visually-hidden"
                         type="file"
-                        accept="audio/*"
+                        accept="audio/mpeg,audio/mp4,audio/ogg,audio/wav,audio/webm,.mp3,.m4a,.mp4,.ogg,.oga,.wav,.webm"
                         onChange={useAudioFile}
                         aria-label="Choose an audio file"
                       />
@@ -961,7 +1073,7 @@ function PhotoWorkflow() {
                   <p className="workflow-kicker">PHOTO IN THIS DRAFT</p>
                   <strong>{selectedPhoto.name}</strong>
                   <p>{selectedPhoto.source === 'device' ? 'Local image preview' : selectedPhoto.source === 'google-photos' ? 'Imported from your selected Google Photos items' : 'Sample image preview'}</p>
-                  <div className="draft-note"><Icon name="spark" size={16} /> Your photo and voice note are not sent to a processing service by this screen.</div>
+                  <div className="draft-note"><Icon name="spark" size={16} /> Your uploaded photo and voice note are sent to the private agents only when you choose to run them.</div>
                 </aside>
               </div>
             </div>
@@ -973,9 +1085,9 @@ function PhotoWorkflow() {
                 <div>
                   <p className="workflow-kicker">STEP 03 · REVIEW YOUR DRAFT</p>
                   <h2>A clear place to review what you chose.</h2>
-                  <p className="workflow-muted">This preview is local. An image-editing service and Google Photos saving are not connected here.</p>
+                  <p className="workflow-muted">Run the private image agents to create and review an edited version of your photo.</p>
                 </div>
-                <button className="workflow-back-link" type="button" onClick={() => moveToStep(2)}>Edit direction</button>
+                <button className="workflow-back-link" type="button" onClick={() => moveToStep(2)} disabled={isRunningAgent}>Edit direction</button>
               </div>
 
               <div className="review-grid">
@@ -984,8 +1096,8 @@ function PhotoWorkflow() {
                   <span className="review-image-label">ORIGINAL</span>
                 </div>
                 <div className="review-photo-card review-photo-styled">
-                  <div className="review-image styled-image"><img src={selectedPhoto.src} alt={'Style preview: ' + selectedPhoto.alt} /></div>
-                  <span className="review-image-label">STYLE PREVIEW</span>
+                  <div className="review-image styled-image"><img src={generatedPhotoUrl || selectedPhoto.src} alt={generatedPhotoUrl ? 'AI-generated edit of ' + selectedPhoto.alt : 'Style preview: ' + selectedPhoto.alt} /></div>
+                  <span className="review-image-label">{generatedPhotoUrl ? 'GENERATED IMAGE' : 'STYLE PREVIEW'}</span>
                 </div>
               </div>
 
@@ -1002,21 +1114,37 @@ function PhotoWorkflow() {
               </div>
 
               <div className="review-actions">
+                <button
+                  className="workflow-primary-button"
+                  type="button"
+                  onClick={() => void createWithAgents()}
+                  disabled={isRunningAgent || !user}
+                  aria-busy={isRunningAgent}
+                >
+                  {isRunningAgent ? 'Agents working…' : agentResult ? 'Run agents again' : 'Create with AI agents'}
+                  {!isRunningAgent && <Icon name="spark" size={17} />}
+                </button>
                 <button className="workflow-secondary-button" type="button" onClick={() => {
                   setNotice('Google Photos saving is not connected in this frontend yet.')
                 }}>
                   Save to Google Photos
                 </button>
                 <button className="workflow-primary-button" type="button" onClick={downloadPhoto}>
-                  Download selected photo <Icon name="upload" size={17} />
+                  {generatedPhotoUrl ? 'Download generated photo' : 'Download selected photo'} <Icon name="upload" size={17} />
                 </button>
               </div>
+              {agentResult && (
+                <p className="workflow-notice" role="status">
+                  Agent review completed with {agentResult.revisionCount} automated revision{agentResult.revisionCount === 1 ? '' : 's'}.
+                </p>
+              )}
+              {workflowError && <p className="workflow-error" role="alert">{workflowError}</p>}
               {notice && <p className="workflow-notice" role="status">{notice}</p>}
             </div>
           )}
 
           <div className="workflow-card-footer">
-            <span className="draft-status"><i /> Draft stays in this browser</span>
+            <span className="draft-status"><i /> {selectedPhoto?.creationId ? 'Private creation' : 'Draft stays in this browser'}</span>
             <div className="workflow-footer-actions">
               {step > 1 && (
                 <button className="workflow-secondary-button" type="button" onClick={() => moveToStep(step - 1)}>Back</button>
@@ -1031,7 +1159,7 @@ function PhotoWorkflow() {
                   {isUploadingPhoto ? 'Uploading…' : 'Continue'} {!isUploadingPhoto && <Icon name="arrow" size={17} />}
                 </button>
               ) : (
-                <button className="workflow-secondary-button" type="button" onClick={() => {
+                <button className="workflow-secondary-button" type="button" disabled={isRunningAgent} onClick={() => {
                   if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
                   photoUrlRef.current = ''
                   clearAudio()
