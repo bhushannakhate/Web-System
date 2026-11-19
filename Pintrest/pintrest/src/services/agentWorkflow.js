@@ -50,13 +50,18 @@ export async function uploadCreationAudio(creationId, audioFile, user) {
   )
 }
 
-export function runAgentWorkflow(creationId, instructions, user) {
+export function runAgentWorkflow(
+  creationId,
+  instructions,
+  user,
+  includeAudio,
+) {
   return apiRequest(
     `/creations/${encodeURIComponent(creationId)}/agent-workflows`,
     user,
     {
       method: 'POST',
-      body: JSON.stringify({ instructions }),
+      body: JSON.stringify({ instructions, includeAudio }),
     },
   )
 }

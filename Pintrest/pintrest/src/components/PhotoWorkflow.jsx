@@ -59,8 +59,8 @@ function googleDurationMs(value, fallback) {
 
 const steps = [
   { number: 1, label: 'Choose a photo' },
-  { number: 2, label: 'Describe your idea' },
-  { number: 3, label: 'Review & save' },
+  { number: 2, label: 'Describe your ideas' },
+  { number: 3, label: 'View & save' },
 ]
 
 function Icon({ name, size = 20 }) {
@@ -179,7 +179,7 @@ function PhotoWorkflow() {
     pickerStateRef.current = null
     setGooglePhotosItems([])
     setIsPickingGooglePhotos(false)
-    if (!pending) return
+    if (!pending) return null
 
     let cleanupError
     if (pending.sessionId) {
@@ -196,22 +196,22 @@ function PhotoWorkflow() {
         cleanupError ||= error
       }
     }
-    if (cleanupError) throw cleanupError
+    return cleanupError || null
   }
 
   async function cancelGooglePhotosSelection() {
-    try {
-      await clearGooglePhotosSelection()
+    const cleanupError = await clearGooglePhotosSelection()
+    if (cleanupError) {
+      setPhotoError(cleanupError.message)
+    } else {
       setPhotoError('')
       setNotice('Google Photos selection cancelled.')
-    } catch (error) {
-      setPhotoError(error.message)
     }
   }
 
   async function chooseGooglePhotos() {
     if (!user) {
-      setPhotoError('Sign in before connecting Google Photos.')
+      setPhotoError('Please sign in or create an account before connecting Google Photos.')
       return
     }
     if (isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto) return
@@ -269,7 +269,13 @@ function PhotoWorkflow() {
           const { mediaItems } = await listGooglePhotosPickerItems(session.sessionId, user)
           if (pickerCancelledRef.current) return
           if (!mediaItems.length) {
-            throw new Error('No supported photos were selected. Choose a JPEG, PNG, or WebP photo and retry.')
+            pickerWindow.close()
+            pickerWindowRef.current = null
+            setGooglePhotosItems([])
+            setIsPickingGooglePhotos(false)
+            setPhotoError('No supported photos were selected. Choose a JPEG, PNG, or WebP photo and retry.')
+            await clearGooglePhotosSelection()
+            return
           }
           pickerWindow.close()
           pickerWindowRef.current = null
@@ -280,7 +286,12 @@ function PhotoWorkflow() {
         }
       }
       if (!pickerCancelledRef.current) {
-        throw new Error('The Google Photos selection timed out. Start a new selection and try again.')
+        pickerWindow.close()
+        pickerWindowRef.current = null
+        setGooglePhotosItems([])
+        setIsPickingGooglePhotos(false)
+        setPhotoError('The Google Photos selection timed out. Start a new selection and try again.')
+        await clearGooglePhotosSelection()
       }
     } catch (error) {
       pickerWindowRef.current?.close()
@@ -372,13 +383,12 @@ function PhotoWorkflow() {
     }
   }
 
-  async function chooseSample(photo) {
+  async function preparePhotoReplacement() {
     if (pickerStateRef.current) {
-      try {
-        await clearGooglePhotosSelection()
-      } catch (error) {
-        setPhotoError(error.message)
-        return
+      const cleanupError = await clearGooglePhotosSelection()
+      if (cleanupError) {
+        setPhotoError(cleanupError.message)
+        return false
       }
     }
     if (selectedPhoto?.creationId) {
@@ -388,7 +398,7 @@ function PhotoWorkflow() {
       } catch (error) {
         setPhotoError(error.message)
         setIsUploadingPhoto(false)
-        return
+        return false
       }
       setIsUploadingPhoto(false)
     }
@@ -396,6 +406,11 @@ function PhotoWorkflow() {
       URL.revokeObjectURL(photoUrlRef.current)
       photoUrlRef.current = ''
     }
+    return true
+  }
+
+  async function chooseSample(photo) {
+    if (!(await preparePhotoReplacement())) return
     setSelectedPhoto(photo)
     clearAgentResult()
     setShowSamples(true)
@@ -418,26 +433,7 @@ function PhotoWorkflow() {
       setPhotoError('That photo is larger than 10 MB. Choose a smaller file.')
       return
     }
-    if (pickerStateRef.current) {
-      try {
-        await clearGooglePhotosSelection()
-      } catch (error) {
-        setPhotoError(error.message)
-        return
-      }
-    }
-    if (selectedPhoto?.creationId) {
-      setIsUploadingPhoto(true)
-      try {
-        await deleteUploadedCreation(selectedPhoto.creationId, user)
-      } catch (error) {
-        setPhotoError(error.message)
-        setIsUploadingPhoto(false)
-        return
-      }
-      setIsUploadingPhoto(false)
-    }
-    if (photoUrlRef.current) URL.revokeObjectURL(photoUrlRef.current)
+    if (!(await preparePhotoReplacement())) return
     const src = URL.createObjectURL(file)
     photoUrlRef.current = src
     setSelectedPhoto({
@@ -659,19 +655,24 @@ function PhotoWorkflow() {
       setWorkflowError('Choose a device photo or import a Google Photos image. Sample previews are not stored in your private creation.')
       return
     }
-    if (!audioFile) {
-      setWorkflowError('Add a voice note or audio file before running the agents.')
+    const instructions = prompt.trim()
+    if (!instructions && !audioFile) {
+      setWorkflowError('Enter written instructions, add a voice note, or provide both.')
       return
     }
 
     setIsRunningAgent(true)
     setWorkflowError('')
-    setNotice('Uploading your voice note and running the image agents. This can take a few minutes.')
+    setNotice(
+      audioFile
+        ? 'Uploading your voice note and running the image agents. This can take a few minutes.'
+        : 'Running the image agents with your written instructions. This can take a few minutes.',
+    )
     try {
-      if (
+      if (audioFile && (
         audioUploadRef.current?.creationId !== selectedPhoto.creationId ||
         audioUploadRef.current?.audioFile !== audioFile
-      ) {
+      )) {
         await uploadCreationAudio(selectedPhoto.creationId, audioFile, user)
         audioUploadRef.current = {
           creationId: selectedPhoto.creationId,
@@ -681,8 +682,9 @@ function PhotoWorkflow() {
 
       const result = await runAgentWorkflow(
         selectedPhoto.creationId,
-        prompt.trim(),
+        instructions,
         user,
+        Boolean(audioFile),
       )
       const outputUrl = await getGeneratedImageUrl(
         selectedPhoto.creationId,
@@ -690,7 +692,7 @@ function PhotoWorkflow() {
       )
       setGeneratedPhotoUrl(outputUrl)
       setAgentResult(result.creation?.agentWorkflow || null)
-      setNotice('The agents completed their review and saved the generated image to your private creation.')
+      setNotice('The agents completed their edits and saved the generated image to your private creation.')
     } catch (error) {
       setWorkflowError(error.message)
       setNotice('')
@@ -734,7 +736,13 @@ function PhotoWorkflow() {
 
     try {
       const response = await fetch(photoUrl)
-      if (!response.ok) throw new Error('Download failed')
+      if (!response.ok) {
+        anchor.href = photoUrl
+        anchor.target = '_blank'
+        anchor.click()
+        setNotice('The photo opened in a new tab because this source does not allow direct downloads.')
+        return
+      }
       const blob = await response.blob()
       const downloadUrl = URL.createObjectURL(blob)
       anchor.href = downloadUrl
@@ -805,9 +813,9 @@ function PhotoWorkflow() {
 
       <section className="workflow-content">
         <div className="workflow-intro">
-          <p className="workflow-eyebrow"><span /> A creative space for your next idea</p>
-          <h1>Make room to <em>imagine.</em></h1>
-          <p>Choose a photo, share the feeling you want, and review your work in one calm space.</p>
+          <p className="workflow-eyebrow"><span /> Edit the photos you have just lying about.</p>
+          <h1>Ready to make some <em>changes?</em></h1>
+          <p>Choose a photo, tell the AI Agents what you want to change, and view your work!</p>
         </div>
         {notice && step !== 3 && <p className="workflow-notice workflow-global-notice" role="status">{notice}</p>}
 
@@ -836,9 +844,9 @@ function PhotoWorkflow() {
             <div className="workflow-step-content">
               <div className="workflow-section-heading">
                 <div>
-                  <p className="workflow-kicker">STEP 01 · START WITH A PHOTO</p>
-                  <h2>Choose the image you want to shape.</h2>
-                  <p className="workflow-muted">Use a photo from your device or explore the sample library.</p>
+                  <p className="workflow-kicker">STEP 01 · START WITH AN IMAGE</p>
+                  <h2>Choose the image you want to edit.</h2>
+                  <p className="workflow-muted">You must use a photo from your device or Google Photos. Don't forget to log in!</p>
                 </div>
                 <span className="workflow-required">PHOTO REQUIRED</span>
               </div>
@@ -888,7 +896,7 @@ function PhotoWorkflow() {
               </div>
 
               <p className="google-photos-disclosure">
-                Google Photos access is optional and limited to the photos you select. Imported copies are validated and stored privately in your Pinboard draft. See the <Link to="/privacy">Privacy Policy</Link>.
+                Google Photos access is optional and limited to the photos you select. Only users with an account on Pinboard Studio may use Google Photos. Imported copies are validated and stored privately in your Pinboard draft. See the <Link to="/privacy">Privacy Policy</Link>.
               </p>
               {googlePhotosConnected && (
                 <button
@@ -997,16 +1005,16 @@ function PhotoWorkflow() {
             <div className="workflow-step-content">
               <div className="workflow-section-heading">
                 <div>
-                  <p className="workflow-kicker">STEP 02 · ADD YOUR DIRECTION</p>
-                  <h2>What would you like this photo to feel like?</h2>
-                  <p className="workflow-muted">Write a short direction or record a voice note to keep with this draft.</p>
+                  <p className="workflow-kicker">STEP 02 · ADD YOUR IDEAS</p>
+                  <h2>What would you like our Agents to do to your photo?</h2>
+                  <p className="workflow-muted">Use written instructions, a voice note, or both. A microphone is optional. Make sure your instructions don't conflict or the agents can get confused.</p>
                 </div>
                 <button className="workflow-back-link" type="button" onClick={() => moveToStep(1)}>Change photo</button>
               </div>
 
               <div className="direction-grid">
                 <div className="direction-main">
-                  <label className="workflow-label" htmlFor="photo-prompt">Your creative direction <span>OPTIONAL</span></label>
+                  <label className="workflow-label" htmlFor="photo-prompt">Your creative direction(s) <span>OPTIONAL</span></label>
                   <textarea
                     id="photo-prompt"
                     className="workflow-textarea"
@@ -1029,8 +1037,8 @@ function PhotoWorkflow() {
                     <div className="audio-panel-heading">
                       <span className="audio-icon"><Icon name="mic" size={20} /></span>
                       <div>
-                        <strong>Add a voice note</strong>
-                        <small>Record a note or choose an existing audio file.</small>
+                        <strong>Optional: add a voice note</strong>
+                        <small> Record a note or choose an existing audio file.</small>
                       </div>
                     </div>
                     <div className="audio-controls">
@@ -1083,9 +1091,9 @@ function PhotoWorkflow() {
             <div className="workflow-step-content">
               <div className="workflow-section-heading">
                 <div>
-                  <p className="workflow-kicker">STEP 03 · REVIEW YOUR DRAFT</p>
-                  <h2>A clear place to review what you chose.</h2>
-                  <p className="workflow-muted">Run the private image agents to create and review an edited version of your photo.</p>
+                  <p className="workflow-kicker">STEP 03 · REVIEW AND MAKE YOUR CHANGES</p>
+                  <h2>Review your instructions and run the Agents!.</h2>
+                  <p className="workflow-muted">Run the private image agents with your written instructions, voice note, or both.</p>
                 </div>
                 <button className="workflow-back-link" type="button" onClick={() => moveToStep(2)} disabled={isRunningAgent}>Edit direction</button>
               </div>
