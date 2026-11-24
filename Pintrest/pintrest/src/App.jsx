@@ -6,6 +6,7 @@ import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import LoginPage from './pages/LoginPage'
 import CustomersPage from './pages/CustomersPage'
 import AccountPage from './pages/AccountPage'
+import CreationDetailPage from './pages/CreationDetailPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import RegisterPage from './pages/RegisterPage'
 import PhotoWorkflow from './components/PhotoWorkflow'
@@ -50,20 +51,7 @@ function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path="/account" element={<AccountPage />} />
-              <Route
-                path="/dashboard"
-                element={
-                  <Suspense
-                    fallback={
-                      <main className="auth-page" aria-live="polite">
-                        <p className="auth-loading" role="status">Loading your library…</p>
-                      </main>
-                    }
-                  >
-                    <DashboardPage />
-                  </Suspense>
-                }
-              />
+              <Route path="/account/creations/:creationId" element={<CreationDetailPage />} />
               <Route element={<AdminRoute />}>
                 <Route path="/customers" element={<CustomersPage />} />
               </Route>
