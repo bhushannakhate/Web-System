@@ -1,5 +1,5 @@
 # Stage 1: use Node to install locked dependencies and compile React/Vite into static files.
-FROM node:22-alpine AS build
+FROM node:24-alpine AS build
 
 WORKDIR /app
 
