@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
@@ -14,8 +14,6 @@ import SiteLayout from './components/SiteLayout'
 import { AdminRoute, ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AdminAccessProvider } from './auth/AdminAccessProvider'
 import { trackPageView } from './services/analytics'
-
-const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 
 function AnalyticsPageView() {
   const location = useLocation()
