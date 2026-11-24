@@ -1132,14 +1132,14 @@
             box-shadow 300ms ease;
 }
 
-.page-shell .pinterest-button:hover,
+.page-shell .share-button:hover,
 .page-shell .start-editing-button:hover:not(:disabled),
 .page-shell .primary-button:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 10px 24px rgba(79, 40, 33, 0.16);
 }
 
-.page-shell .pinterest-button:active,
+.page-shell .share-button:active,
 .page-shell .start-editing-button:active:not(:disabled),
 .page-shell .primary-button:active:not(:disabled) {
     transform: translateY(0) scale(0.985);
@@ -1160,18 +1160,18 @@
     transform: translateY(-4px);
 }
 
-.page-shell .pinterest-connect-panel,
-.page-shell .pinterest-library,
+.page-shell .photo-source-connect-panel,
+.page-shell .photo-source-library,
 .page-shell .pin-picker {
     animation: soft-reveal 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.page-shell .pinterest-connect-panel {
+.page-shell .photo-source-connect-panel {
     overflow: hidden;
     position: relative;
 }
 
-.page-shell .pinterest-connect-panel::before {
+.page-shell .photo-source-connect-panel::before {
     width: 130px;
     height: 130px;
     position: absolute;
@@ -1183,7 +1183,7 @@
     animation: organic-turn 12s linear infinite;
 }
 
-.page-shell .pinterest-symbol {
+.page-shell .photo-source-symbol {
     animation: symbol-in 650ms 180ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
@@ -1426,9 +1426,9 @@
     }
 }
 
-/* Pinterest source flow */
-.page-shell .pinterest-connect-panel,
-.page-shell .pinterest-library {
+/* Photo source flow */
+.page-shell .photo-source-connect-panel,
+.page-shell .photo-source-library {
     width: 100%;
     height: 214px;
     margin-top: 13px;
@@ -1444,7 +1444,7 @@
     text-align: center;
 }
 
-.page-shell .pinterest-symbol {
+.page-shell .photo-source-symbol {
     width: 40px;
     height: 40px;
     display: grid;
@@ -1454,24 +1454,24 @@
     color: #fff;
 }
 
-.page-shell .pinterest-symbol svg,
-.page-shell .pinterest-button svg {
+.page-shell .photo-source-symbol svg,
+.page-shell .share-button svg {
     width: 24px;
     fill: currentColor;
 }
 
-.page-shell .pinterest-connect-panel strong {
+.page-shell .photo-source-connect-panel strong {
     font-size: 14px;
 }
 
-.page-shell .pinterest-connect-panel p {
+.page-shell .photo-source-connect-panel p {
     margin: 6px 0 0;
     color: #77716b;
     font-size: 11px;
     line-height: 1.45;
 }
 
-.page-shell .pinterest-button {
+.page-shell .share-button {
     min-width: 210px;
     padding: 11px 15px;
     display: flex;
@@ -1487,20 +1487,20 @@
     cursor: pointer;
 }
 
-.page-shell .pinterest-button:hover {
+.page-shell .share-button:hover {
     background: #bd001d;
 }
 
-.page-shell .pinterest-button:disabled {
+.page-shell .share-button:disabled {
     cursor: wait;
     opacity: 0.72;
 }
 
-.page-shell .pinterest-button svg {
+.page-shell .share-button svg {
     width: 18px;
 }
 
-.page-shell .pinterest-library {
+.page-shell .photo-source-library {
     align-items: stretch;
     justify-content: flex-start;
     text-align: left;
@@ -1535,7 +1535,7 @@
     cursor: pointer;
 }
 
-.page-shell .pinterest-library > label {
+.page-shell .photo-source-library > label {
     margin-top: 18px;
     font-size: 12px;
     font-weight: 700;
@@ -1721,14 +1721,14 @@
     }
 }
 
-.page-shell.theme-dark .pinterest-connect-panel,
-.page-shell.theme-dark .pinterest-library {
+.page-shell.theme-dark .photo-source-connect-panel,
+.page-shell.theme-dark .photo-source-library {
     border-color: #48423b;
     background: #292622;
     color: #f4f0e9;
 }
 
-.page-shell.theme-dark .pinterest-connect-panel p {
+.page-shell.theme-dark .photo-source-connect-panel p {
     color: #bdb6ad;
 }
 
@@ -1764,7 +1764,7 @@
     }
 }
 
-/* Pinterest-inspired product language */
+/* Product language */
 .page-shell {
     background:
             radial-gradient(circle at 50% 8%, rgba(230, 0, 35, 0.035), transparent 28rem),
@@ -1845,21 +1845,21 @@
     font-weight: 400;
 }
 
-.page-shell .pinterest-connect-panel,
-.page-shell .pinterest-library {
+.page-shell .photo-source-connect-panel,
+.page-shell .photo-source-library {
     border-color: #e4e4e4;
     border-radius: 20px;
     background: #f7f7f7;
 }
 
-.page-shell .pinterest-button,
+.page-shell .share-button,
 .page-shell .primary-button,
 .page-shell .accept-button {
     border-radius: 999px;
     background: #e60023;
 }
 
-.page-shell .pinterest-button:hover,
+.page-shell .share-button:hover,
 .page-shell .primary-button:hover:not(:disabled),
 .page-shell .accept-button:hover:not(:disabled) {
     background: #ad081b;
@@ -2042,7 +2042,7 @@
 }
 
 /* Split source selection and creative direction */
-.page-shell .pinterest-source-card {
+.page-shell .photo-source-card {
     padding: 48px 58px 42px;
     position: relative;
     border: 1px solid #e9e9e9;
@@ -2071,26 +2071,26 @@
     flex-direction: column;
 }
 
-.page-shell .source-controls .pinterest-connect-panel,
-.page-shell .source-controls .pinterest-library {
+.page-shell .source-controls .photo-source-connect-panel,
+.page-shell .source-controls .photo-source-library {
     height: 100%;
     min-height: 390px;
     margin-top: 13px;
     padding: 30px;
 }
 
-.page-shell .source-controls .pinterest-connect-panel {
+.page-shell .source-controls .photo-source-connect-panel {
     gap: 18px;
 }
 
-.page-shell .source-controls .pinterest-connect-panel p {
+.page-shell .source-controls .photo-source-connect-panel p {
     max-width: 230px;
     margin-right: auto;
     margin-left: auto;
     font-size: 12px;
 }
 
-.page-shell .source-controls .pinterest-library {
+.page-shell .source-controls .photo-source-library {
     min-height: 250px;
     justify-content: center;
 }
@@ -2348,7 +2348,7 @@
     width: 100%;
 }
 
-.page-shell.theme-dark .pinterest-source-card {
+.page-shell.theme-dark .photo-source-card {
     border-color: #3a3631;
     background: rgba(33, 31, 28, 0.97);
     box-shadow: 0 24px 55px rgba(0, 0, 0, 0.22);
@@ -2391,7 +2391,7 @@
 }
 
 @media (max-width: 760px) {
-    .page-shell .pinterest-source-card {
+    .page-shell .photo-source-card {
         padding: 34px 24px 28px;
     }
 
@@ -2400,8 +2400,8 @@
         grid-template-columns: 1fr;
     }
 
-    .page-shell .source-controls .pinterest-connect-panel,
-    .page-shell .source-controls .pinterest-library {
+    .page-shell .source-controls .photo-source-connect-panel,
+    .page-shell .source-controls .photo-source-library {
         min-height: 290px;
     }
 
@@ -2420,7 +2420,7 @@
 }
 
 @media (max-width: 500px) {
-    .page-shell .pinterest-source-card {
+    .page-shell .photo-source-card {
         border-radius: 22px;
     }
 
@@ -2552,7 +2552,7 @@
     transform: translateY(-1px);
 }
 
-.page-shell .pinterest-source-card,
+.page-shell .photo-source-card,
 .page-shell .workspace,
 .page-shell .result-card {
     border-color: #e8ded5;
@@ -2561,7 +2561,7 @@
             0 2px 6px rgba(58, 46, 37, 0.04);
 }
 
-.page-shell .pinterest-source-card {
+.page-shell .photo-source-card {
     background:
             linear-gradient(135deg, rgba(230, 0, 35, 0.025), transparent 45%),
             #fff;
@@ -2592,14 +2592,14 @@
     background: linear-gradient(135deg, #f4ece4, #fbf7f2);
 }
 
-.page-shell .pinterest-button,
+.page-shell .share-button,
 .page-shell .primary-button,
 .page-shell .accept-button {
     background: var(--color-primary);
     box-shadow: 0 7px 16px rgba(230, 0, 35, 0.16);
 }
 
-.page-shell .pinterest-button:hover,
+.page-shell .share-button:hover,
 .page-shell .primary-button:hover:not(:disabled),
 .page-shell .accept-button:hover:not(:disabled) {
     background: var(--color-primary-strong);
@@ -2824,7 +2824,7 @@
     color: #d4cbc2;
 }
 
-.page-shell.theme-dark .pinterest-source-card,
+.page-shell.theme-dark .photo-source-card,
 .page-shell.theme-dark .workspace,
 .page-shell.theme-dark .result-card {
     border-color: #48423b;
@@ -2866,7 +2866,7 @@
     background: rgba(255, 250, 245, 0.94);
 }
 
-.page-shell:not(.theme-dark) .pinterest-source-card,
+.page-shell:not(.theme-dark) .photo-source-card,
 .page-shell:not(.theme-dark) .workspace,
 .page-shell:not(.theme-dark) .result-card {
     border-color: #ead8ca;
@@ -2917,8 +2917,8 @@
     border-color: #eaded3;
 }
 
-.page-shell:not(.theme-dark) .pinterest-connect-panel,
-.page-shell:not(.theme-dark) .pinterest-library,
+.page-shell:not(.theme-dark) .photo-source-connect-panel,
+.page-shell:not(.theme-dark) .photo-source-library,
 .page-shell:not(.theme-dark) textarea,
 .page-shell:not(.theme-dark) .select-wrap select {
     border-color: #e3d4c7;
@@ -2930,7 +2930,7 @@
     background: linear-gradient(135deg, #efe1d5, #f8eee6);
 }
 
-.page-shell:not(.theme-dark) .pinterest-button,
+.page-shell:not(.theme-dark) .share-button,
 .page-shell:not(.theme-dark) .primary-button,
 .page-shell:not(.theme-dark) .accept-button,
 .page-shell:not(.theme-dark) .start-editing-button,
@@ -2940,7 +2940,7 @@
     box-shadow: 0 7px 16px rgba(166, 47, 39, 0.18);
 }
 
-.page-shell:not(.theme-dark) .pinterest-button:hover,
+.page-shell:not(.theme-dark) .share-button:hover,
 .page-shell:not(.theme-dark) .primary-button:hover:not(:disabled),
 .page-shell:not(.theme-dark) .accept-button:hover:not(:disabled),
 .page-shell:not(.theme-dark) .start-editing-button:hover:not(:disabled),

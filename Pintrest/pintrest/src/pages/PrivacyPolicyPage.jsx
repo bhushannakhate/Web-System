@@ -7,7 +7,7 @@ function PrivacyPolicyPage() {
       <header className="privacy-header">
         <p className="page-eyebrow"><span /> Your data, your choice</p>
         <h1>Privacy <em>policy.</em></h1>
-        <p className="privacy-updated">Effective November 11, 2026</p>
+        <p className="privacy-updated">Effective November 21, 2026</p>
         <p className="privacy-intro">
           Pinboard Studio helps you work with images you choose. We use personal
           information only to provide, protect, and improve the features you
@@ -35,13 +35,20 @@ function PrivacyPolicyPage() {
               <strong>Google Photos data:</strong> when you separately connect
               Google Photos, we receive only the photos you select through
               Google's Picker. We create a private Pinboard copy of an image
-              only after you choose to import it. The original remains in your
-              Google Photos account.
+              only after you choose to import it. If you choose Save to Google
+              Photos, we add a copy of the selected or generated image to your
+              Photos library. This does not modify the original.
             </li>
             <li>
               <strong>Basic service information:</strong> information needed to
               operate the service, keep accounts secure, and troubleshoot
               errors.
+            </li>
+            <li>
+              <strong>Usage analytics:</strong> page views and app interactions,
+              including when an image-agent workflow is started, along with
+              technical information and Google Analytics identifiers used to
+              understand service usage and performance.
             </li>
           </ul>
         </section>
@@ -53,9 +60,11 @@ function PrivacyPolicyPage() {
             We use selected images and your instructions to provide the
             requested image editing experience, and to save or return results
             to you. Google Photos access is separate from Firebase sign-in;
-            we request access only to items you select in Picker. We use an
-            imported image only for the Pinboard feature you requested. We do
-            not modify or publish the original in Google Photos.
+            we request access only to items you select in Picker and to add
+            images to your library when you explicitly choose to save them. We
+            use an imported image only for the Pinboard feature you requested.
+            Saving creates a new copy and does not modify the original in
+            Google Photos.
           </p>
           <p>
             When you request AI image editing, the relevant image and
@@ -73,6 +82,19 @@ function PrivacyPolicyPage() {
             We do not sell, rent, or use your images, Google Photos data, or
             instructions for unrelated advertising. We do not use your content
             to train our own AI models.
+          </p>
+          <p>
+            We use Google Analytics to measure page views and app usage, such as
+            agent workflow starts and outcomes, so we can understand engagement
+            and service reliability. Google Analytics may use cookies or
+            similar identifiers and receives technical information about your
+            browser and device. Analytics events do not include your images,
+            audio, editing instructions, Firebase account ID, or creation IDs.
+            Learn more in{' '}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noreferrer">
+              Google's Privacy Policy
+            </a>
+            .
           </p>
         </section>
 
@@ -122,11 +144,12 @@ function PrivacyPolicyPage() {
             Connecting Google Photos is optional. You choose the items shared
             with Pinboard and can disconnect from the photo workflow or revoke
             access in your Google Account settings. Disconnecting revokes our
-            stored authorization and prevents future Picker requests; it does
-            not remove copies you already imported into Pinboard or delete the
-            original photos. Delete a Pinboard creation to remove its stored
-            media. You may also contact us to request access to, correction of,
-            or deletion of your account information, subject to applicable law.
+            stored authorization and prevents future Google Photos requests; it
+            does not remove copies you already imported into Pinboard, delete
+            photos you saved to Google Photos, or delete the original photos.
+            Delete a Pinboard creation to remove its stored media. You may also
+            contact us to request access to, correction of, or deletion of your
+            account information, subject to applicable law.
           </p>
         </section>
 

@@ -386,3 +386,101 @@ body,
   }
 }
 
+.site-layout .creation-dashboard {
+  --dash-ink: #182638;
+  --dash-muted: #69788a;
+  --dash-coral: #286cd3;
+  --dash-line: rgba(126, 146, 170, .24);
+}
+
+.site-layout .creation-dashboard .dashboard-create-button,
+.site-layout .creation-dashboard .dashboard-apply-button {
+  border-color: #286cd3;
+  background: #286cd3;
+  color: #fff;
+}
+
+.site-layout .creation-dashboard .dashboard-create-button:hover,
+.site-layout .creation-dashboard .dashboard-apply-button:hover:not(:disabled) {
+  border-color: #1e56ac;
+  background: #1e56ac;
+  color: #fff;
+}
+
+.site-layout .creation-dashboard .dashboard-clear-button,
+.site-layout .creation-dashboard .creation-action-button,
+.site-layout .creation-dashboard .dashboard-load-more button,
+.site-layout .creation-dashboard .creation-dialog-close {
+  border-color: #dce5ef;
+}
+
+.site-layout .creation-dashboard .dashboard-clear-button:hover,
+.site-layout .creation-dashboard .creation-action-button:hover:not(:disabled),
+.site-layout .creation-dashboard .dashboard-load-more button:hover:not(:disabled) {
+  background: #eef4fc;
+}
+
+.site-layout .creation-dashboard .dashboard-filters input,
+.site-layout .creation-dashboard .dashboard-filters select,
+.site-layout .creation-dashboard .creation-retry-form textarea {
+  border-color: #d5dfeb;
+  background: #fbfcfe;
+}
+
+.site-layout .creation-dashboard .creation-card {
+  border-color: #dfe7f0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, .84);
+  box-shadow: 0 12px 34px rgba(38, 50, 72, .05);
+}
+
+.site-layout .creation-dashboard .creation-image-pair,
+.site-layout .creation-dashboard .creation-image-frame,
+.site-layout .creation-dashboard .creation-detail-image img,
+.site-layout .creation-dashboard .creation-detail-image > p {
+  background-color: #eef2f8;
+}
+
+.site-layout .creation-dashboard .creation-detail-dialog {
+  border-radius: 20px;
+}
+
+.landing-hero h1 {
+  color: #182638;
+}
+
+.landing-hero h1 em,
+.landing-note span,
+.landing-primary:hover {
+  color: #286cd3;
+}
+
+.landing-copy,
+.landing-note p {
+  color: #69788a;
+}
+
+.landing-primary {
+  border-color: #286cd3;
+  background: #286cd3;
+  color: #fff;
+}
+
+.landing-primary:hover {
+  border-color: #1e56ac;
+  background: #1e56ac;
+  color: #fff;
+}
+
+.landing-secondary {
+  border-color: #dce5ef;
+  color: #3f5064;
+}
+
+.landing-secondary:hover {
+  background: #eef4fc;
+}
+
+.landing-note {
+  border-color: #dfe7f0;
+}

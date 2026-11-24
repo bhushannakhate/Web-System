@@ -1,4 +1,5 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { lazy, Suspense, useEffect, useRef } from 'react'
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
@@ -11,10 +12,28 @@ import PhotoWorkflow from './components/PhotoWorkflow'
 import SiteLayout from './components/SiteLayout'
 import { AdminRoute, ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AdminAccessProvider } from './auth/AdminAccessProvider'
+import { trackPageView } from './services/analytics'
+
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+
+function AnalyticsPageView() {
+  const location = useLocation()
+  const lastPath = useRef('')
+
+  useEffect(() => {
+    const path = location.pathname
+    if (lastPath.current === path) return
+    lastPath.current = path
+    trackPageView(path)
+  }, [location.pathname])
+
+  return null
+}
 
 function App() {
   return (
     <BrowserRouter>
+      <AnalyticsPageView />
       <AdminAccessProvider>
         <Routes>
           <Route path="/" element={<PhotoWorkflow />} />
@@ -31,6 +50,20 @@ function App() {
 
             <Route element={<ProtectedRoute />}>
               <Route path="/account" element={<AccountPage />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <Suspense
+                    fallback={
+                      <main className="auth-page" aria-live="polite">
+                        <p className="auth-loading" role="status">Loading your library…</p>
+                      </main>
+                    }
+                  >
+                    <DashboardPage />
+                  </Suspense>
+                }
+              />
               <Route element={<AdminRoute />}>
                 <Route path="/customers" element={<CustomersPage />} />
               </Route>

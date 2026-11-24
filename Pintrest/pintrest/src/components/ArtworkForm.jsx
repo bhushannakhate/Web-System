@@ -12,7 +12,7 @@ function Icon({ name, size = 20, strokeWidth = 1.8 }) {
     arrow: <><path d="M12 5v14" /><path d="m18 13-6 6-6-6" /></>,
     check: <><path d="m5 12 4.3 4.3L19 6.7" /></>,
     mic: <><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3M8 22h8" /></>,
-    pinterest: <><path d="M9.2 21c.6-1.3.9-2.4 1.2-3.8.3-1.4-1.2-2.4-1.2-5 0-3.2 2.3-5.5 5.4-5.5 2.6 0 4.5 1.9 4.5 4.2 0 2.8-1.2 5.9-3.7 5.9-1.2 0-2.1-1-1.8-2.2l.7-2.8c.3-1.2-.1-2.2-1.3-2.2-1.5 0-2.7 1.5-2.7 3.5 0 1.3.4 2.2.4 2.2s-1.4 5.9-1.6 6.9" /><path d="M12 22C6.5 22 2 17.5 2 12S6.5 2 12 2s10 4.5 10 10-4.5 10-10 10Z" /></>,
+    share: <><path d="m8.7 10.7 6.6-4.4m-6.6 7 6.6 4.4" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="5" r="3" /><circle cx="18" cy="19" r="3" /></>,
     upload: <><path d="M12 16V4M7 9l5-5 5 5" /><path d="M4 20h16" /></>,
   }
 
@@ -33,7 +33,7 @@ function ArtworkForm() {
   const [audioUrl, setAudioUrl] = useState('')
   const [audioError, setAudioError] = useState('')
   const [submitState, setSubmitState] = useState('idle')
-  const [pinterestState, setPinterestState] = useState('idle')
+  const [shareState, setShareState] = useState('idle')
 
   // Refs hold DOM/browser objects that should persist without causing re-renders.
   const fileInputRef = useRef(null)
@@ -168,9 +168,9 @@ function ArtworkForm() {
     window.setTimeout(() => setSubmitState('success'), 900)
   }
 
-  const handlePinterest = () => {
-    setPinterestState('success')
-    window.setTimeout(() => setPinterestState('idle'), 2400)
+  const handleShare = () => {
+    setShareState('success')
+    window.setTimeout(() => setShareState('idle'), 2400)
   }
 
   return (
@@ -180,7 +180,7 @@ function ArtworkForm() {
           <div className="form-heading d-flex flex-wrap gap-2">
             <div>
               <p className="step-label">01 <span>·</span> Change your image by uploading or audio</p>
-              <h2>what will you submit to Pinterest?</h2>
+              <h2>What would you like to create?</h2>
             </div>
             <span className="required-note">* required</span>
           </div>
@@ -277,7 +277,7 @@ function ArtworkForm() {
           </div>
 
           <div className="form-footer d-flex flex-column-reverse flex-md-row gap-3">
-            <div className="privacy-note"><span className="privacy-dot" /> Make sure to sign in to Pinterest.</div>
+            <div className="privacy-note"><span className="privacy-dot" /> Sign in to save and share your artwork.</div>
             <button
               className="btn btn-primary primary-button"
               type="submit"
@@ -288,7 +288,7 @@ function ArtworkForm() {
               ) : submitState === 'success' ? (
                 <><Icon name="check" size={17} /> Ready to polish</>
               ) : (
-                <>Create and upload to Pinterest <Icon name="arrow" size={17} /></>
+                <>Create your artwork <Icon name="arrow" size={17} /></>
               )}
             </button>
           </div>
@@ -296,8 +296,8 @@ function ArtworkForm() {
           {submitState === 'success' && (
             <div className="alert alert-success success-panel d-flex flex-column flex-md-row gap-3" role="status">
               <div><span className="success-icon"><Icon name="check" size={17} /></span><span>Your brief is ready for the Gemini polish step.</span></div>
-              <button type="button" className="btn btn-danger pinterest-button" onClick={handlePinterest} disabled={pinterestState === 'success'}>
-                <Icon name="pinterest" size={17} /> {pinterestState === 'success' ? 'Uploaded to Pinterest' : 'Put on Pinterest'}
+              <button type="button" className="btn btn-danger share-button" onClick={handleShare} disabled={shareState === 'success'}>
+                <Icon name="share" size={17} /> {shareState === 'success' ? 'Shared successfully' : 'Share your artwork'}
               </button>
             </div>
           )}

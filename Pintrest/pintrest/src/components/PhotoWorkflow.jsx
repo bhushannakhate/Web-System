@@ -13,6 +13,7 @@ import {
   importGooglePhotosItem,
   listGooglePhotosPickerItems,
   pollGooglePhotosPickerSession,
+  saveGooglePhotosImage,
 } from '../services/googlePhotos'
 import { deleteUploadedCreation, uploadSourceImage } from '../services/mediaUpload'
 import {
@@ -122,6 +123,7 @@ function PhotoWorkflow() {
   const [generatedPhotoUrl, setGeneratedPhotoUrl] = useState('')
   const [agentResult, setAgentResult] = useState(null)
   const [isRunningAgent, setIsRunningAgent] = useState(false)
+  const [isSavingToGooglePhotos, setIsSavingToGooglePhotos] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [isRequestingMic, setIsRequestingMic] = useState(false)
   const [recordingSeconds, setRecordingSeconds] = useState(0)
@@ -133,8 +135,9 @@ function PhotoWorkflow() {
   )
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false)
   const [googlePhotosConnected, setGooglePhotosConnected] = useState(
-    oauthResult === 'connected',
+    false,
   )
+  const [googlePhotosCanSave, setGooglePhotosCanSave] = useState(false)
   const [googlePhotosItems, setGooglePhotosItems] = useState([])
   const [isPickingGooglePhotos, setIsPickingGooglePhotos] = useState(false)
   const [isImportingGooglePhoto, setIsImportingGooglePhoto] = useState(false)
@@ -156,6 +159,13 @@ function PhotoWorkflow() {
   useEffect(() => {
     mountedRef.current = true
     if (oauthResult) {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage(
+          { type: 'pinboard-google-photos-oauth', status: oauthResult },
+          window.location.origin,
+        )
+        window.close()
+      }
       window.history.replaceState({}, '', window.location.pathname)
     }
     return () => {
@@ -170,6 +180,26 @@ function PhotoWorkflow() {
       if (audioUrlRef.current) URL.revokeObjectURL(audioUrlRef.current)
     }
   }, [oauthResult])
+
+  useEffect(() => {
+    let active = true
+    if (user) {
+      getGooglePhotosConnection(user)
+        .then((connection) => {
+          if (!active) return
+          setGooglePhotosConnected(connection.connected)
+          setGooglePhotosCanSave(connection.canSave === true)
+        })
+        .catch(() => {
+          if (!active) return
+          setGooglePhotosConnected(false)
+          setGooglePhotosCanSave(false)
+        })
+    }
+    return () => {
+      active = false
+    }
+  }, [user])
 
   async function clearGooglePhotosSelection() {
     const pending = pickerStateRef.current
@@ -228,6 +258,7 @@ function PhotoWorkflow() {
     try {
       const connection = await getGooglePhotosConnection(user)
       setGooglePhotosConnected(connection.connected)
+      setGooglePhotosCanSave(connection.canSave === true)
       if (!connection.connected) {
         pickerWindow.close()
         pickerWindowRef.current = null
@@ -375,11 +406,113 @@ function PhotoWorkflow() {
     try {
       await disconnectGooglePhotos(user)
       setGooglePhotosConnected(false)
+      setGooglePhotosCanSave(false)
       setNotice('Google Photos has been disconnected.')
     } catch (error) {
       setPhotoError(error.message)
     } finally {
       setIsUploadingPhoto(false)
+    }
+  }
+
+  function waitForGooglePhotosAuthorization(popup) {
+    return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        window.removeEventListener('message', onMessage)
+        window.clearTimeout(timeout)
+        window.clearInterval(closeCheck)
+      }
+      const onMessage = (event) => {
+        if (
+          event.origin !== window.location.origin ||
+          event.data?.type !== 'pinboard-google-photos-oauth'
+        ) {
+          return
+        }
+        cleanup()
+        if (event.data.status === 'connected') {
+          resolve()
+        } else {
+          reject(
+            new Error(
+              event.data.status === 'denied'
+                ? 'Google Photos permission was not granted.'
+                : 'Google Photos could not connect. Please try again.',
+            ),
+          )
+        }
+      }
+      const timeout = window.setTimeout(() => {
+        cleanup()
+        popup.close()
+        reject(new Error('Google Photos authorization timed out. Please retry.'))
+      }, 180000)
+      const closeCheck = window.setInterval(() => {
+        if (!popup.closed) return
+        cleanup()
+        reject(new Error('Google Photos authorization was closed.'))
+      }, 500)
+      window.addEventListener('message', onMessage)
+    })
+  }
+
+  async function handleSaveToGooglePhotos() {
+    if (!user) {
+      setWorkflowError('Sign in before saving an image to Google Photos.')
+      return
+    }
+    if (!selectedPhoto?.creationId) {
+      setWorkflowError('Choose a photo and save it to your private draft first.')
+      return
+    }
+
+    setIsSavingToGooglePhotos(true)
+    setWorkflowError('')
+    setNotice('')
+    let popup
+    try {
+      if (!googlePhotosCanSave) {
+        popup = window.open('about:blank', 'google-photos-authorization')
+        if (!popup) {
+          throw new Error('Allow pop-ups to authorize Google Photos, then retry.')
+        }
+      }
+
+      const connection = await getGooglePhotosConnection(user)
+      setGooglePhotosConnected(connection.connected)
+      setGooglePhotosCanSave(connection.canSave === true)
+      if (!connection.canSave) {
+        if (!popup) {
+          throw new Error('Reconnect Google Photos to allow saving images.')
+        }
+        const { authorizationUrl } = await getGooglePhotosAuthorizationUrl(user)
+        const authorizationResult = waitForGooglePhotosAuthorization(popup)
+        try {
+          popup.location.assign(authorizationUrl)
+        } catch (error) {
+          popup.close()
+          await authorizationResult.catch(() => {})
+          throw error
+        }
+        await authorizationResult
+        const updatedConnection = await getGooglePhotosConnection(user)
+        setGooglePhotosConnected(updatedConnection.connected)
+        setGooglePhotosCanSave(updatedConnection.canSave === true)
+        if (!updatedConnection.canSave) {
+          throw new Error('Google Photos did not grant permission to save images.')
+        }
+      } else {
+        popup?.close()
+      }
+
+      const mediaKind = generatedPhotoUrl ? 'outputImage' : 'sourceImage'
+      await saveGooglePhotosImage(selectedPhoto.creationId, mediaKind, user)
+      setNotice('The image was saved to your Google Photos library.')
+    } catch (error) {
+      popup?.close()
+      setWorkflowError(error.message)
+    } finally {
+      setIsSavingToGooglePhotos(false)
     }
   }
 
@@ -759,6 +892,8 @@ function PhotoWorkflow() {
   async function handleSignOut() {
     try {
       await signOut()
+      setGooglePhotosConnected(false)
+      setGooglePhotosCanSave(false)
     } catch {
       setNotice('We could not sign you out. Please try again.')
     }
@@ -1132,10 +1267,14 @@ function PhotoWorkflow() {
                   {isRunningAgent ? 'Agents working…' : agentResult ? 'Run agents again' : 'Create with AI agents'}
                   {!isRunningAgent && <Icon name="spark" size={17} />}
                 </button>
-                <button className="workflow-secondary-button" type="button" onClick={() => {
-                  setNotice('Google Photos saving is not connected in this frontend yet.')
-                }}>
-                  Save to Google Photos
+                <button
+                  className="workflow-secondary-button"
+                  type="button"
+                  onClick={() => void handleSaveToGooglePhotos()}
+                  disabled={isSavingToGooglePhotos || !user}
+                  aria-busy={isSavingToGooglePhotos}
+                >
+                  {isSavingToGooglePhotos ? 'Saving to Google Photos…' : 'Save to Google Photos'}
                 </button>
                 <button className="workflow-primary-button" type="button" onClick={downloadPhoto}>
                   {generatedPhotoUrl ? 'Download generated photo' : 'Download selected photo'} <Icon name="upload" size={17} />

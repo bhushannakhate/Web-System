@@ -183,7 +183,7 @@ label span:not(.optional-label) {
 .bootstrap-page .mini-button,
 .bootstrap-page .record-button,
 .bootstrap-page .primary-button,
-.bootstrap-page .pinterest-button {
+.bootstrap-page .share-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -196,7 +196,7 @@ label span:not(.optional-label) {
 .bootstrap-page .mini-button svg,
 .bootstrap-page .record-button svg,
 .bootstrap-page .primary-button svg,
-.bootstrap-page .pinterest-button svg {
+.bootstrap-page .share-button svg {
   flex-shrink: 0;
 }
 
@@ -440,7 +440,7 @@ textarea::placeholder {
   width: 22px;
 }
 
-.bootstrap-page .pinterest-button {
+.bootstrap-page .share-button {
   background: #b9363e;
   border: 0;
   border-radius: 3px;
@@ -449,7 +449,7 @@ textarea::placeholder {
   flex-shrink: 0;
 }
 
-.bootstrap-page .pinterest-button:disabled {
+.bootstrap-page .share-button:disabled {
   cursor: default;
   opacity: .85;
 }
@@ -496,7 +496,7 @@ textarea::placeholder {
     align-items: stretch;
   }
 
-  .bootstrap-page .pinterest-button {
+  .bootstrap-page .share-button {
     justify-content: center;
     width: 100%;
   }

@@ -23,30 +23,31 @@ The default `web.app` domain is already authorized for Firebase Authentication. 
 
 The Project 2 API provides Firebase-authenticated profile and creation endpoints plus the opt-in demo customer API. The account page currently calls `GET /api/users/me`; the API supports these other protected endpoints as well. Set `VITE_API_BASE_URL` at build time to the API origin.
 
-| Method | Endpoint | UI action |
-|---|---|---|
-| `GET` | `/api/health` | Check API availability. |
-| `GET` | `/api/users/me` | Initialize/load the signed-in user's Firestore profile. |
-| `PATCH` | `/api/users/me` | Update the signed-in user's allowed profile fields. |
-| `GET` | `/api/creations` | List the signed-in user's creations. |
-| `GET` | `/api/creations/:creationId` | Load one owned creation. |
-| `POST` | `/api/creations` | Create a user-owned creation. |
-| `PATCH` | `/api/creations/:creationId` | Update an owned creation. |
-| `DELETE` | `/api/creations/:creationId` | Soft-delete an owned creation. |
-| `POST` | `/api/creations/:creationId/media/sourceImage/uploads` | Create a short-lived source-image upload. |
-| `POST` | `/api/creations/:creationId/media/uploads/:uploadId/complete` | Validate and attach a source image to the creation. |
-| `GET` | `/api/google-photos/connection` | Read the signed-in user's Google Photos connection status. |
-| `POST` | `/api/google-photos/oauth/authorize` | Start the separate Google Photos OAuth consent flow. |
-| `DELETE` | `/api/google-photos/connection` | Revoke and disconnect Google Photos. |
-| `POST` | `/api/creations/:creationId/google-photos/sessions` | Start an owner-bound Picker session for a draft. |
-| `GET` | `/api/google-photos/sessions/:sessionId` | Poll the Picker session. |
-| `GET` | `/api/google-photos/sessions/:sessionId/media-items` | List items explicitly selected in that Picker session. |
-| `POST` | `/api/creations/:creationId/google-photos/sessions/:sessionId/import` | Import one selected image through server validation and storage. |
-| `DELETE` | `/api/google-photos/sessions/:sessionId` | Cancel a Picker session. |
+| Method   | Endpoint                                                              | UI action                                                             |
+| -------- | --------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `GET`    | `/api/health`                                                         | Check API availability.                                               |
+| `GET`    | `/api/users/me`                                                       | Initialize/load the signed-in user's Firestore profile.               |
+| `PATCH`  | `/api/users/me`                                                       | Update the signed-in user's allowed profile fields.                   |
+| `GET`    | `/api/creations`                                                      | List the signed-in user's creations.                                  |
+| `GET`    | `/api/creations/:creationId`                                          | Load one owned creation.                                              |
+| `POST`   | `/api/creations`                                                      | Create a user-owned creation.                                         |
+| `PATCH`  | `/api/creations/:creationId`                                          | Update an owned creation.                                             |
+| `DELETE` | `/api/creations/:creationId`                                          | Soft-delete an owned creation.                                        |
+| `POST`   | `/api/creations/:creationId/media/sourceImage/uploads`                | Create a short-lived source-image upload.                             |
+| `POST`   | `/api/creations/:creationId/media/uploads/:uploadId/complete`         | Validate and attach a source image to the creation.                   |
+| `GET`    | `/api/google-photos/connection`                                       | Read the signed-in user's Google Photos connection status.            |
+| `POST`   | `/api/google-photos/oauth/authorize`                                  | Start the separate Google Photos OAuth consent flow.                  |
+| `DELETE` | `/api/google-photos/connection`                                       | Revoke and disconnect Google Photos.                                  |
+| `POST`   | `/api/creations/:creationId/google-photos/sessions`                   | Start an owner-bound Picker session for a draft.                      |
+| `GET`    | `/api/google-photos/sessions/:sessionId`                              | Poll the Picker session.                                              |
+| `GET`    | `/api/google-photos/sessions/:sessionId/media-items`                  | List items explicitly selected in that Picker session.                |
+| `POST`   | `/api/creations/:creationId/google-photos/sessions/:sessionId/import` | Import one selected image through server validation and storage.      |
+| `POST`   | `/api/creations/:creationId/google-photos/save`                       | Save an owned source or generated image to the user's Photos library. |
+| `DELETE` | `/api/google-photos/sessions/:sessionId`                              | Cancel a Picker session.                                              |
 
 The UI obtains a fresh Firebase ID token before calling protected routes and sends it as a bearer token. The demo customer directory is available at `/customers` only to verified Firebase accounts configured in the API's server-only `ADMIN_EMAILS` allowlist. Its API routes independently enforce administrator access; changing frontend state cannot grant access.
 
-On the photo workflow, a signed-in user can upload one JPEG, PNG, or WebP image up to 10 MB or separately connect Google Photos and choose items in Google's Picker. OAuth uses a distinct, server-managed authorization with only the Picker media-items scope; Firebase sign-in alone does not grant Photos access. The API binds each Picker session to the signed-in user and draft, polls using Google's recommended intervals, and offers only selected photos. When one photo is imported, the backend retrieves its temporary bytes and runs them through the same actual-byte validation, normalization, private storage, and cleanup lifecycle used by device uploads. Temporary Google Photos URLs are not shown to the browser or saved. The user can revoke the connection from the workflow. Sample photos remain local demo assets and are not Google Photos data.
+On the photo workflow, a signed-in user can upload one JPEG, PNG, or WebP image up to 10 MB or separately connect Google Photos and choose items in Google's Picker. OAuth uses a distinct, server-managed authorization for the Picker media-items scope and the append-only scope needed to save a photo; Firebase sign-in alone does not grant Photos access. The API binds each Picker session to the signed-in user and draft, polls using Google's recommended intervals, and offers only selected photos. When one photo is imported, the backend retrieves its temporary bytes and runs them through the same actual-byte validation, normalization, private storage, and cleanup lifecycle used by device uploads. When the user chooses Save to Google Photos, the API uploads the selected or generated image to their library. Temporary Google Photos URLs are not shown to the browser or saved. The user can revoke the connection from the workflow. Sample photos remain local demo assets and are not Google Photos data.
 
 ## Application routes
 
@@ -69,13 +70,22 @@ npm run dev
 
 Copy `.env.example` to `.env.local` and fill in the Firebase Web App values from Firebase Console → Project settings → Your apps. The client API key and app ID are Firebase web configuration, not service-account credentials; never put a service-account JSON in this frontend. Enable Email/Password and Google under Firebase Authentication → Sign-in method. The default Firebase Hosting domain is authorized automatically.
 
-Google Photos OAuth credentials and the token-encryption key are API-only settings. Configure the OAuth callback URI and Picker API in Google Cloud, then set the server-side `GOOGLE_PHOTOS_*` variables described in the Project 2 API README. Never add those secrets to `VITE_*` variables. Google OAuth callback results return to the frontend origin that initiated the connection.
+Google Photos OAuth credentials and the token-encryption key are API-only settings. Configure the OAuth callback URI, Picker API, and Library API in Google Cloud, then set the server-side `GOOGLE_PHOTOS_*` variables described in the Project 2 API README. Never add those secrets to `VITE_*` variables. Google OAuth callback results return to the frontend origin that initiated the connection.
 
 Set `VITE_API_BASE_URL` to the API base URL:
 
 ```dotenv
 VITE_API_BASE_URL=https://project-2-api-m5lsuu6ouq-uc.a.run.app
 ```
+
+To enable Google Analytics 4, set `VITE_GA4_MEASUREMENT_ID` to the web stream's
+Measurement ID (`G-...`) in `.env.local` before starting Vite or building for
+Firebase Hosting; Firebase Hosting serves the static build and does not inject
+environment variables at runtime. The React app records route pageviews and
+agent workflow starts. It forwards the GA client/session IDs with the agent
+request so the Express API can associate its outcome event with that visitor.
+Never put the GA Measurement Protocol API secret in this frontend; configure
+`GA4_MEASUREMENT_ID` and `GA4_API_SECRET` only in the Express API environment.
 
 For local development, `vite.config.js` proxies `/api` requests to `http://localhost:4000`.
 

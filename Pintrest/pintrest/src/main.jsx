@@ -6,6 +6,9 @@ import './index.css'
 import App from './App.jsx'
 import './integrated.css'
 import { AuthProvider } from './auth/AuthContext'
+import { initializeAnalytics } from './services/analytics'
+
+initializeAnalytics()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -14,4 +17,3 @@ createRoot(document.getElementById('root')).render(
     </AuthProvider>
   </StrictMode>,
 )
-

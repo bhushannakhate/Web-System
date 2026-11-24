@@ -15,6 +15,17 @@ export async function disconnectGooglePhotos(user) {
   return apiRequest('/google-photos/connection', user, { method: 'DELETE' })
 }
 
+export async function saveGooglePhotosImage(creationId, mediaKind, user) {
+  return apiRequest(
+    `/creations/${encodeURIComponent(creationId)}/google-photos/save`,
+    user,
+    {
+      method: 'POST',
+      body: JSON.stringify({ mediaKind }),
+    },
+  )
+}
+
 export async function createGooglePhotosDraft(user) {
   const { creation } = await apiRequest('/creations', user, {
     method: 'POST',

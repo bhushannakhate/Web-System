@@ -1,4 +1,5 @@
 import { apiRequest } from './api'
+import { getGaRequestHeaders, trackAgentWorkflowStarted } from './analytics'
 
 const MAX_AUDIO_BYTES = 25 * 1024 * 1024
 const AUDIO_CONTENT_TYPES = new Set([
@@ -56,13 +57,17 @@ export function runAgentWorkflow(
   user,
   includeAudio,
 ) {
-  return apiRequest(
-    `/creations/${encodeURIComponent(creationId)}/agent-workflows`,
-    user,
-    {
-      method: 'POST',
-      body: JSON.stringify({ instructions, includeAudio }),
-    },
+  trackAgentWorkflowStarted(includeAudio)
+  return getGaRequestHeaders().then((analyticsHeaders) =>
+    apiRequest(
+      `/creations/${encodeURIComponent(creationId)}/agent-workflows`,
+      user,
+      {
+        method: 'POST',
+        headers: analyticsHeaders,
+        body: JSON.stringify({ instructions, includeAudio }),
+      },
+    ),
   )
 }
 
