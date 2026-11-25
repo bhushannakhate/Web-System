@@ -51,11 +51,34 @@ export async function uploadCreationAudio(creationId, audioFile, user) {
   )
 }
 
+export async function transcribeCreationAudio(creationId, user) {
+  const result = await apiRequest(
+    `/creations/${encodeURIComponent(creationId)}/transcription`,
+    user,
+    { method: 'POST', body: JSON.stringify({}) },
+  )
+  return result.transcription
+}
+
+export async function saveCreationTranscript(creationId, transcript, user) {
+  const result = await apiRequest(
+    `/creations/${encodeURIComponent(creationId)}/transcription`,
+    user,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ transcript }),
+    },
+  )
+  return result.transcription
+}
+
 export function runAgentWorkflow(
   creationId,
   instructions,
   user,
   includeAudio,
+  transcript,
+  consentToGemini,
 ) {
   trackAgentWorkflowStarted(includeAudio)
   return getGaRequestHeaders().then((analyticsHeaders) =>
@@ -65,7 +88,12 @@ export function runAgentWorkflow(
       {
         method: 'POST',
         headers: analyticsHeaders,
-        body: JSON.stringify({ instructions, includeAudio }),
+        body: JSON.stringify({
+          instructions,
+          includeAudio,
+          transcript,
+          consentToGemini,
+        }),
       },
     ),
   )

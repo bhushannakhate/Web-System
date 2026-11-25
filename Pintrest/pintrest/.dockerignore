@@ -1,0 +1,9 @@
+.git
+.idea
+.env
+.env.*
+!.env.example
+*.local
+node_modules
+dist
+dist-ssr
