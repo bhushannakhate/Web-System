@@ -21,7 +21,7 @@ export async function apiRequest(path, user, options = {}) {
       },
     })
   } catch {
-    throw new Error('Could not reach the Pinboard Studio API. Check your connection and try again.')
+    throw new Error('Could not reach the AI Photo Studio service. Check your connection and try again.')
   }
 
   const payload = await response.json().catch(() => null)

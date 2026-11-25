@@ -18,7 +18,7 @@ function LandingPage() {
           {!user && <Link className="landing-secondary" to="/login">Sign in</Link>}
         </div>
       </section>
-      <section className="landing-note" aria-label="About Pinboard Studio">
+      <section className="landing-note" aria-label="About AI Photo Studio">
         <span>01</span>
         <p>A little space for big ideas.</p>
       </section>

@@ -9,7 +9,7 @@ function PrivacyPolicyPage() {
         <h1>Privacy <em>policy.</em></h1>
         <p className="privacy-updated">Effective November 21, 2026</p>
         <p className="privacy-intro">
-          Pinboard Studio helps you work with images you choose. We use personal
+          AI Photo Studio helps you work with images you choose. We use personal
           information only to provide, protect, and improve the features you
           request. We do not sell your personal information or use it for
           unrelated advertising.
@@ -23,7 +23,7 @@ function PrivacyPolicyPage() {
             <li>
               <strong>Account information:</strong> your email address, display
               name, and account identifier. Firebase Authentication handles
-              sign-in credentials; Pinboard Studio does not receive or store
+              sign-in credentials; AI Photo Studio does not receive or store
               your account password.
             </li>
             <li>
@@ -34,7 +34,7 @@ function PrivacyPolicyPage() {
             <li>
               <strong>Google Photos data:</strong> when you separately connect
               Google Photos, we receive only the photos you select through
-              Google's Picker. We create a private Pinboard copy of an image
+              Google's Picker. We create a private AI Photo Studio copy of an image
               only after you choose to import it. If you choose Save to Google
               Photos, we add a copy of the selected or generated image to your
               Photos library. This does not modify the original.
@@ -62,7 +62,7 @@ function PrivacyPolicyPage() {
             to you. Google Photos access is separate from Firebase sign-in;
             we request access only to items you select in Picker and to add
             images to your library when you explicitly choose to save them. We
-            use an imported image only for the Pinboard feature you requested.
+            use an imported image only for the AI Photo Studio feature you requested.
             Saving creates a new copy and does not modify the original in
             Google Photos.
           </p>
@@ -109,7 +109,7 @@ function PrivacyPolicyPage() {
             authorize. Google Photos tokens are encrypted by the API before
             they are stored and are not placed in the browser or returned to
             the frontend. Imported images are validated and stored privately
-            with your Pinboard creation.
+            with your AI Photo Studio creation.
           </p>
           <p>
             We keep information for as long as needed to provide the service,
@@ -142,12 +142,12 @@ function PrivacyPolicyPage() {
           <h2 id="privacy-controls">Your choices and connected accounts</h2>
           <p>
             Connecting Google Photos is optional. You choose the items shared
-            with Pinboard and can disconnect from the photo workflow or revoke
+            with AI Photo Studio and can disconnect from the photo workflow or revoke
             access in your Google Account settings. Disconnecting revokes our
             stored authorization and prevents future Google Photos requests; it
-            does not remove copies you already imported into Pinboard, delete
+            does not remove copies you already imported into AI Photo Studio, delete
             photos you saved to Google Photos, or delete the original photos.
-            Delete a Pinboard creation to remove its stored media. You may also
+            Delete an AI Photo Studio creation to remove its stored media. You may also
             contact us to request access to, correction of, or deletion of your
             account information, subject to applicable law.
           </p>
@@ -168,7 +168,7 @@ function PrivacyPolicyPage() {
           <h2 id="privacy-contact">Contact us</h2>
           <p>
             For privacy questions or data requests, please use the{' '}
-            <Link to="/contact">Pinboard Studio contact page</Link>.
+            <Link to="/contact">AI Photo Studio contact page</Link>.
           </p>
         </section>
       </div>

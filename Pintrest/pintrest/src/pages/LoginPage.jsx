@@ -61,7 +61,7 @@ function LoginPage() {
         </button>
       </form>
       <p className="auth-links">
-        <span>New to Pinboard Studio?</span>
+        <span>New to AI Photo Studio?</span>
         <Link className="auth-link" to="/register">Create an account</Link>
       </p>
     </AuthShell>

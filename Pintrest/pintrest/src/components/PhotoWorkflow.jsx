@@ -25,33 +25,6 @@ import {
 } from '../services/agentWorkflow'
 import './PhotoWorkflow.css'
 
-const samplePhotos = [
-  {
-    id: 'warm-room',
-    name: 'Warm room',
-    alt: 'A warm, contemporary living room',
-    src: 'https://images.unsplash.com/photo-1567016376408-0226e4d0c1ea?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=86&w=1080',
-  },
-  {
-    id: 'quiet-stairs',
-    name: 'Quiet staircase',
-    alt: 'A bright staircase with clean lines',
-    src: 'https://images.unsplash.com/photo-1601993957728-1e56ab70c5a8?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=86&w=1080',
-  },
-  {
-    id: 'studio-flowers',
-    name: 'Studio flowers',
-    alt: 'Flowers arranged in an artist studio',
-    src: 'https://images.unsplash.com/photo-1717620380652-1cba237af61a?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=86&w=1080',
-  },
-  {
-    id: 'reading-hour',
-    name: 'Reading hour',
-    alt: 'A calm reading corner',
-    src: 'https://images.unsplash.com/photo-1661954747645-94bfcae82215?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=86&w=1080',
-  },
-]
-
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024
 const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp'])
 
@@ -107,7 +80,6 @@ function PhotoWorkflow() {
   )
   const [step, setStep] = useState(1)
   const [selectedPhoto, setSelectedPhoto] = useState(null)
-  const [showSamples, setShowSamples] = useState(false)
   const [photoError, setPhotoError] = useState(() => {
     if (oauthResult === 'denied') {
       return 'Google Photos connection was cancelled. You can connect when you are ready.'
@@ -320,7 +292,7 @@ function PhotoWorkflow() {
           pickerWindowRef.current = null
           setGooglePhotosItems(mediaItems)
           setIsPickingGooglePhotos(false)
-          setNotice('Choose one selected photo to import into your private Pinboard draft.')
+          setNotice('Choose one selected photo to import into your private AI Photo Studio draft.')
           return
         }
       }
@@ -561,15 +533,6 @@ function PhotoWorkflow() {
     return true
   }
 
-  async function chooseSample(photo) {
-    if (!(await preparePhotoReplacement())) return
-    setSelectedPhoto(photo)
-    clearAgentResult()
-    setShowSamples(true)
-    setPhotoError('')
-    setNotice('')
-  }
-
   async function chooseLocalPhoto(event) {
     const file = event.target.files?.[0]
     event.target.value = ''
@@ -597,7 +560,6 @@ function PhotoWorkflow() {
       source: 'device',
     })
     clearAgentResult()
-    setShowSamples(false)
     setNotice('')
   }
 
@@ -959,7 +921,7 @@ function PhotoWorkflow() {
     setNotice('')
     const photoUrl = generatedPhotoUrl || selectedPhoto.src
     const anchor = document.createElement('a')
-    anchor.download = 'pinboard-studio-' +
+    anchor.download = 'ai-photo-studio-' +
       (generatedPhotoUrl ? 'generated-' : '') +
       selectedPhoto.name.replace(/[^a-z0-9._-]+/gi, '-')
     anchor.rel = 'noreferrer'
@@ -1008,9 +970,9 @@ function PhotoWorkflow() {
       </div>
 
       <header className="workflow-header">
-        <Link className="workflow-brand" to="/" aria-label="Pinboard Studio home">
-          <span className="workflow-brand-mark">p</span>
-          <span>pinboard <small>studio</small></span>
+        <Link className="workflow-brand" to="/" aria-label="AI Photo Studio home">
+          <span className="workflow-brand-mark">AI</span>
+          <span>AI Photo <small>Studio</small></span>
         </Link>
 
 
@@ -1095,17 +1057,6 @@ function PhotoWorkflow() {
                   <small>{isPickingGooglePhotos ? 'Waiting for your selection…' : 'Choose only the photos you want to import.'}</small>
                   <span className="photo-choice-action">{isPickingGooglePhotos ? 'Picker is open' : 'Open Google Photos Picker'} <Icon name="arrow" size={15} /></span>
                 </button>
-                <button
-                  className={'photo-choice sample-choice' + (showSamples ? ' is-active' : '')}
-                  type="button"
-                  onClick={() => setShowSamples((value) => !value)}
-                  disabled={isUploadingPhoto || isPickingGooglePhotos || isImportingGooglePhoto}
-                >
-                  <span className="photo-choice-icon"><Icon name="photo" size={22} /></span>
-                  <strong>Explore sample photos</strong>
-                  <small>Preview demo images without connecting an account.</small>
-                  <span className="photo-choice-action">{showSamples ? 'Hide sample library' : 'Preview sample library'} <Icon name="arrow" size={15} /></span>
-                </button>
                 <input
                   ref={photoInputRef}
                   className="visually-hidden"
@@ -1117,7 +1068,7 @@ function PhotoWorkflow() {
               </div>
 
               <p className="google-photos-disclosure">
-                Google Photos access is optional and limited to the photos you select. Only users with an account on Pinboard Studio may use Google Photos. Imported copies are validated and stored privately in your Pinboard draft. See the <Link to="/privacy">Privacy Policy</Link>.
+                Google Photos access is optional and limited to the photos you select. Only users with an account on AI Photo Studio may use Google Photos. Imported copies are validated and stored privately in your AI Photo Studio draft. See the <Link to="/privacy">Privacy Policy</Link>.
               </p>
               {googlePhotosConnected && (
                 <button
@@ -1167,33 +1118,6 @@ function PhotoWorkflow() {
                 </div>
               )}
 
-              {showSamples && (
-                <div className="sample-library">
-                  <div className="sample-library-heading">
-                    <div>
-                      <strong>Sample photo library</strong>
-                      <span>These demo images do not come from a connected Google account.</span>
-                    </div>
-                    <span className="sample-badge">PREVIEW</span>
-                  </div>
-                  <div className="sample-photo-grid">
-                    {samplePhotos.map((photo) => (
-                      <button
-                        className={'sample-photo' + (selectedPhoto?.id === photo.id ? ' is-selected' : '')}
-                        type="button"
-                        key={photo.id}
-                        onClick={() => void chooseSample({ ...photo, source: 'sample' })}
-                        disabled={isUploadingPhoto}
-                        aria-pressed={selectedPhoto?.id === photo.id}
-                      >
-                        <img src={photo.src} alt={photo.alt} loading="lazy" />
-                        <span>{photo.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               <div className="photo-preview-row">
                 <div className="photo-preview-frame">
                   {selectedPhoto ? (
@@ -1209,7 +1133,7 @@ function PhotoWorkflow() {
                 <div className="photo-preview-details">
                   <p className="workflow-kicker">YOUR STARTING POINT</p>
                   <h3>{selectedPhoto ? selectedPhoto.name : 'Nothing selected yet'}</h3>
-                  <p>{selectedPhoto ? (selectedPhoto.media ? 'Stored privately with your account.' : selectedIsLocal ? 'Selected from this device.' : 'Sample image for exploring the workflow.') : 'Choose a local photo, Google Photos image, or sample.'}</p>
+                  <p>{selectedPhoto ? (selectedPhoto.media ? 'Stored privately with your account.' : selectedIsLocal ? 'Selected from this device.' : 'Imported from Google Photos.') : 'Choose a local photo or Google Photos image.'}</p>
                   {selectedPhoto && (
                     <button className="workflow-link-button" type="button" onClick={() => void removeSelectedPhoto()} disabled={isUploadingPhoto}>
                       {isUploadingPhoto ? 'Working…' : 'Remove photo'}
@@ -1328,7 +1252,7 @@ function PhotoWorkflow() {
                   <div className="direction-photo"><img src={selectedPhoto.src} alt={selectedPhoto.alt} /></div>
                   <p className="workflow-kicker">PHOTO IN THIS DRAFT</p>
                   <strong>{selectedPhoto.name}</strong>
-                  <p>{selectedPhoto.source === 'device' ? 'Local image preview' : selectedPhoto.source === 'google-photos' ? 'Imported from your selected Google Photos items' : 'Sample image preview'}</p>
+                  <p>{selectedPhoto.source === 'device' ? 'Local image preview' : 'Imported from your selected Google Photos items'}</p>
                   <div className="draft-note"><Icon name="spark" size={16} /> Your uploaded photo and voice note are sent to the private agents only when you choose to run them.</div>
                 </aside>
               </div>
@@ -1376,7 +1300,7 @@ function PhotoWorkflow() {
                   onChange={(event) => setGeminiConsent(event.target.checked)}
                 />
                 <span>
-                  I understand that, for this requested edit, Pinboard Studio will send my selected image and instructions to Google Gemini. The data is used to complete this edit and is not used to train a general model.
+                  I understand that, for this requested edit, AI Photo Studio will send my selected image and instructions to Google Gemini. The data is used to complete this edit and is not used to train a general model.
                 </span>
               </label>
 
@@ -1495,7 +1419,6 @@ function PhotoWorkflow() {
                   clearAudio()
                   setStep(1)
                   setSelectedPhoto(null)
-                  setShowSamples(false)
                   setPrompt('')
                   setPhotoError('')
                   setAudioError('')
@@ -1509,7 +1432,7 @@ function PhotoWorkflow() {
         </section>
 
         <p className="workflow-footnote">
-          Pinboard Studio · A student prototype. <Link to="/about">Learn about the project</Link>
+          AI Photo Studio · A student prototype. <Link to="/about">Learn about the project</Link>
         </p>
       </section>
 
@@ -1520,7 +1443,7 @@ function PhotoWorkflow() {
           <Link to="/contact">Contact</Link>
           <Link to="/privacy">Privacy</Link>
         </nav>
-        <span>© {new Date().getFullYear()} Pinboard Studio</span>
+        <span>© {new Date().getFullYear()} AI Photo Studio</span>
       </footer>
     </main>
   )

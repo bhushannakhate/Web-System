@@ -1,6 +1,6 @@
 import './AuthShell.css'
 
-function AuthShell({ eyebrow = 'PINBOARD STUDIO', title, description, children }) {
+function AuthShell({ eyebrow = 'AI PHOTO STUDIO', title, description, children }) {
   return (
     <main className="auth-page">
       <section className="auth-card" aria-labelledby="auth-title">
