@@ -1,6 +1,5 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { AdminAccessContext } from '../auth/adminAccessContext'
 import { useAuth } from '../auth/useAuth'
 import {
   createGooglePhotosDraft,
@@ -19,6 +18,8 @@ import { deleteUploadedCreation, uploadSourceImage } from '../services/mediaUplo
 import {
   getGeneratedImageUrl,
   runAgentWorkflow,
+  saveCreationTranscript,
+  transcribeCreationAudio,
   uploadCreationAudio,
 } from '../services/agentWorkflow'
 import './PhotoWorkflow.css'
@@ -100,7 +101,6 @@ function Icon({ name, size = 20 }) {
 
 function PhotoWorkflow() {
   const { user, signOut } = useAuth()
-  const { isAdmin } = useContext(AdminAccessContext)
   const [oauthResult] = useState(() =>
     new URLSearchParams(window.location.search).get('googlePhotos'),
   )
@@ -119,6 +119,10 @@ function PhotoWorkflow() {
   const [audioFile, setAudioFile] = useState(null)
   const [audioName, setAudioName] = useState('')
   const [audioError, setAudioError] = useState('')
+  const [transcript, setTranscript] = useState('')
+  const [transcriptionConfidence, setTranscriptionConfidence] = useState(null)
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [geminiConsent, setGeminiConsent] = useState(false)
   const [workflowError, setWorkflowError] = useState('')
   const [generatedPhotoUrl, setGeneratedPhotoUrl] = useState('')
   const [agentResult, setAgentResult] = useState(null)
@@ -588,6 +592,9 @@ function PhotoWorkflow() {
     setAudioUrl('')
     setAudioFile(null)
     setAudioName('')
+    setTranscript('')
+    setTranscriptionConfidence(null)
+    setAudioError('')
     audioUploadRef.current = null
     setGeneratedPhotoUrl('')
     setAgentResult(null)
@@ -597,6 +604,7 @@ function PhotoWorkflow() {
     setGeneratedPhotoUrl('')
     setAgentResult(null)
     setWorkflowError('')
+    setGeminiConsent(false)
   }
 
   function useAudioFile(event) {
@@ -793,6 +801,10 @@ function PhotoWorkflow() {
       setWorkflowError('Enter written instructions, add a voice note, or provide both.')
       return
     }
+    if (!geminiConsent) {
+      setWorkflowError('Confirm the Gemini editing disclosure before running the agents.')
+      return
+    }
 
     setIsRunningAgent(true)
     setWorkflowError('')
@@ -813,11 +825,22 @@ function PhotoWorkflow() {
         }
       }
 
+      if (audioFile && !transcript.trim()) {
+        setNotice('Your voice note is uploaded. Transcribe it, review the words, and run the agents again.')
+        await handleTranscription()
+        return
+      }
+      if (audioFile && transcript.trim()) {
+        await saveCreationTranscript(selectedPhoto.creationId, transcript.trim(), user)
+      }
+
       const result = await runAgentWorkflow(
         selectedPhoto.creationId,
         instructions,
         user,
         Boolean(audioFile),
+        transcript.trim(),
+        geminiConsent,
       )
       const outputUrl = await getGeneratedImageUrl(
         selectedPhoto.creationId,
@@ -831,6 +854,32 @@ function PhotoWorkflow() {
       setNotice('')
     } finally {
       setIsRunningAgent(false)
+    }
+  }
+
+  async function handleTranscription() {
+    if (!selectedPhoto?.creationId || !audioFile) {
+      setAudioError('Add an audio recording before requesting a transcription.')
+      return
+    }
+    setIsTranscribing(true)
+    setAudioError('')
+    try {
+      if (
+        audioUploadRef.current?.creationId !== selectedPhoto.creationId ||
+        audioUploadRef.current?.audioFile !== audioFile
+      ) {
+        await uploadCreationAudio(selectedPhoto.creationId, audioFile, user)
+        audioUploadRef.current = { creationId: selectedPhoto.creationId, audioFile }
+      }
+      const result = await transcribeCreationAudio(selectedPhoto.creationId, user)
+      setTranscript(result.text || '')
+      setTranscriptionConfidence(result.confidence)
+      setNotice('Review the transcription below. You can edit it before running the agents.')
+    } catch (error) {
+      setAudioError(error.message)
+    } finally {
+      setIsTranscribing(false)
     }
   }
 
@@ -916,9 +965,7 @@ function PhotoWorkflow() {
           <span>pinboard <small>studio</small></span>
         </Link>
 
-        <nav className="workflow-nav" aria-label="Main navigation">
-          {isAdmin && <Link to="/customers">Customers</Link>}
-        </nav>
+
 
         <div className="workflow-account">
           <button
@@ -1205,8 +1252,33 @@ function PhotoWorkflow() {
                       <div className="audio-playback">
                         <div className="audio-file-name"><Icon name="check" size={15} /> {audioName || 'Voice note ready'}</div>
                         <audio controls src={audioUrl}>Your browser does not support audio playback.</audio>
+                        <button
+                          className="workflow-secondary-button"
+                          type="button"
+                          onClick={() => void handleTranscription()}
+                          disabled={isTranscribing || isRecording || !user}
+                        >
+                          {isTranscribing ? 'Transcribing…' : transcript ? 'Transcribe again' : 'Transcribe voice note'}
+                        </button>
                         <button className="workflow-link-button" type="button" onClick={clearAudio}>Remove audio</button>
+                        {audioError && <p className="workflow-error" role="alert">{audioError}</p>}
                       </div>
+                    )}
+                    {transcript && (
+                      <label className="transcript-editor">
+                        <span>Editable transcription</span>
+                        <textarea
+                          value={transcript}
+                          maxLength={4000}
+                          rows={5}
+                          onChange={(event) => setTranscript(event.target.value)}
+                        />
+                        <small>
+                          {transcriptionConfidence === null || transcriptionConfidence === undefined
+                            ? 'Edited by you'
+                            : `Provider confidence: ${Math.round(transcriptionConfidence * 100)}%`}
+                        </small>
+                      </label>
                     )}
                   </div>
                 </div>
@@ -1251,17 +1323,28 @@ function PhotoWorkflow() {
                 </div>
                 <div>
                   <p className="workflow-kicker">VOICE NOTE</p>
-                  <p className="review-prompt">{audioName || 'No audio added.'}</p>
+                  <p className="review-prompt">{transcript || audioName || 'No audio added.'}</p>
                   {audioUrl && <audio className="review-audio" controls src={audioUrl}>Your browser does not support audio playback.</audio>}
                 </div>
               </div>
+
+              <label className="gemini-consent">
+                <input
+                  type="checkbox"
+                  checked={geminiConsent}
+                  onChange={(event) => setGeminiConsent(event.target.checked)}
+                />
+                <span>
+                  I understand that, for this requested edit, Pinboard Studio will send my selected image and instructions to Google Gemini. The data is used to complete this edit and is not used to train a general model.
+                </span>
+              </label>
 
               <div className="review-actions">
                 <button
                   className="workflow-primary-button"
                   type="button"
                   onClick={() => void createWithAgents()}
-                  disabled={isRunningAgent || !user}
+                  disabled={isRunningAgent || !user || !geminiConsent || (Boolean(audioFile) && !transcript.trim())}
                   aria-busy={isRunningAgent}
                 >
                   {isRunningAgent ? 'Agents working…' : agentResult ? 'Run agents again' : 'Create with AI agents'}
@@ -1336,7 +1419,6 @@ function PhotoWorkflow() {
           <Link to="/about">About</Link>
           <Link to="/contact">Contact</Link>
           <Link to="/privacy">Privacy</Link>
-          {isAdmin && <Link to="/customers">Customers</Link>}
         </nav>
         <span>© {new Date().getFullYear()} Pinboard Studio</span>
       </footer>
