@@ -4,15 +4,13 @@ import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
 import LoginPage from './pages/LoginPage'
-import CustomersPage from './pages/CustomersPage'
 import AccountPage from './pages/AccountPage'
 import CreationDetailPage from './pages/CreationDetailPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import RegisterPage from './pages/RegisterPage'
 import PhotoWorkflow from './components/PhotoWorkflow'
 import SiteLayout from './components/SiteLayout'
-import { AdminRoute, ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
-import { AdminAccessProvider } from './auth/AdminAccessProvider'
+import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { trackPageView } from './services/analytics'
 
 function AnalyticsPageView() {
@@ -33,8 +31,7 @@ function App() {
   return (
     <BrowserRouter>
       <AnalyticsPageView />
-      <AdminAccessProvider>
-        <Routes>
+      <Routes>
           <Route path="/" element={<PhotoWorkflow />} />
 
           <Route element={<SiteLayout />}>
@@ -50,16 +47,12 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route path="/account" element={<AccountPage />} />
               <Route path="/account/creations/:creationId" element={<CreationDetailPage />} />
-              <Route element={<AdminRoute />}>
-                <Route path="/customers" element={<CustomersPage />} />
-              </Route>
             </Route>
           </Route>
 
           <Route path="/studio" element={<Navigate to="/" replace />} />
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </AdminAccessProvider>
+      </Routes>
     </BrowserRouter>
   )
 }

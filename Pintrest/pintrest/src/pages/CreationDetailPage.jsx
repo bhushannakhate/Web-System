@@ -62,7 +62,7 @@ function CreationDetailPage() {
           <div className="detail-state detail-state-error" role="alert">
             <strong>We couldn’t load this creation.</strong>
             <p>{result.error}</p>
-            <button className="dashboard-secondary-button" type="button" onClick={() => void loadCreation()}>Try again</button>
+            <button className="detail-secondary-button" type="button" onClick={() => void loadCreation()}>Try again</button>
           </div>
         ) : (
           <article className="creation-detail-card">
@@ -97,8 +97,8 @@ function CreationDetailPage() {
                 <div className="detail-fact"><span>Creation ID</span><strong>{result.creation.id}</strong></div>
                 {result.creation.instructions && <div className="detail-instructions"><span>Instructions</span><p>{result.creation.instructions}</p></div>}
                 <div className="detail-actions">
-                  {result.sourceUrl && <a className="dashboard-primary-button" href={result.sourceUrl} target="_blank" rel="noreferrer">Open source image</a>}
-                  {result.outputUrl && <a className="dashboard-secondary-button" href={result.outputUrl} target="_blank" rel="noreferrer">Open output image</a>}
+                  {result.sourceUrl && <a className="detail-primary-button" href={result.sourceUrl} target="_blank" rel="noreferrer">Open source image</a>}
+                  {result.outputUrl && <a className="detail-secondary-button" href={result.outputUrl} target="_blank" rel="noreferrer">Open output image</a>}
                   <button className="detail-delete-button" type="button" onClick={() => void handleDelete()} disabled={deleting}>{deleting ? 'Deleting…' : 'Delete creation'}</button>
                 </div>
               </aside>

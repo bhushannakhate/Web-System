@@ -164,7 +164,6 @@
   text-decoration: none;
 }
 
-.workflow-theme-button,
 .workflow-text-button {
   display: inline-flex;
   align-items: center;
@@ -1095,6 +1094,25 @@
   justify-content: flex-end;
   gap: .65rem;
   margin-top: 1rem;
+}
+
+.review-decision-panel {
+  margin-top: 1rem;
+}
+
+.review-decision-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: .65rem;
+  margin-top: .75rem;
+}
+
+.revision-instruction {
+  width: min(100%, 420px);
+  min-height: 78px;
+  margin: 0;
 }
 
 .workflow-notice {
