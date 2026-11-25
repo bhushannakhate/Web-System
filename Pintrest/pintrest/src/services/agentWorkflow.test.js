@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   runAgentWorkflow,
+  reviewCreation,
   saveCreationTranscript,
   transcribeCreationAudio,
   uploadCreationAudio,
@@ -67,5 +68,19 @@ describe('agent workflow API contracts', () => {
       transcript: 'Make the room much brighter.',
       consentToGemini: true,
     })
+  })
+
+  it('sends an explicit approval or revision request to the review endpoint', async () => {
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ creation: { reviewStatus: 'revision_requested' } }), { status: 200 }),
+    )
+
+    await reviewCreation('creation-id', 'request_revision', 'Make the room warmer.', user)
+
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body)).toEqual({
+      action: 'request_revision',
+      instruction: 'Make the room warmer.',
+    })
+    expect(fetchMock.mock.calls[0][0]).toContain('/creations/creation-id/review')
   })
 })

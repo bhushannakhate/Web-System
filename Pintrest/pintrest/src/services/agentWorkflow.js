@@ -106,3 +106,18 @@ export async function getGeneratedImageUrl(creationId, user) {
   )
   return download.downloadUrl
 }
+
+export async function reviewCreation(creationId, action, instruction, user) {
+  const result = await apiRequest(
+    `/creations/${encodeURIComponent(creationId)}/review`,
+    user,
+    {
+      method: 'POST',
+      body: JSON.stringify({
+        action,
+        ...(instruction?.trim() ? { instruction: instruction.trim() } : {}),
+      }),
+    },
+  )
+  return result.creation
+}

@@ -1,12 +1,9 @@
-import { useContext } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
-import { AdminAccessContext } from '../auth/adminAccessContext'
 import { useAuth } from '../auth/useAuth'
 import './SiteLayout.css'
 
 function SiteLayout() {
   const { user } = useAuth()
-  const adminAccess = useContext(AdminAccessContext)
   const navLinkClass = ({ isActive }) => (isActive ? 'active' : undefined)
 
   return (
@@ -28,7 +25,6 @@ function SiteLayout() {
           <NavLink className={navLinkClass} to="/about">About</NavLink>
           <NavLink className={navLinkClass} to="/contact">Contact</NavLink>
           <NavLink className={navLinkClass} to="/privacy">Privacy</NavLink>
-          {adminAccess.isAdmin && <NavLink className={navLinkClass} to="/customers">Customers</NavLink>}
         </nav>
 
         <div className="workflow-account">
@@ -54,7 +50,6 @@ function SiteLayout() {
           <NavLink to="/about">About</NavLink>
           <NavLink to="/contact">Contact</NavLink>
           <NavLink to="/privacy">Privacy</NavLink>
-          {adminAccess.isAdmin && <NavLink to="/customers">Customers</NavLink>}
         </nav>
         <p className="footer-copyright">© {new Date().getFullYear()} Pinboard Studio</p>
       </footer>

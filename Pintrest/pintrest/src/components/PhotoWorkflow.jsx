@@ -17,6 +17,7 @@ import {
 import { deleteUploadedCreation, uploadSourceImage } from '../services/mediaUpload'
 import {
   getGeneratedImageUrl,
+  reviewCreation,
   runAgentWorkflow,
   saveCreationTranscript,
   transcribeCreationAudio,
@@ -126,12 +127,15 @@ function PhotoWorkflow() {
   const [workflowError, setWorkflowError] = useState('')
   const [generatedPhotoUrl, setGeneratedPhotoUrl] = useState('')
   const [agentResult, setAgentResult] = useState(null)
+  const [reviewStatus, setReviewStatus] = useState('pending')
+  const [revisionInstruction, setRevisionInstruction] = useState('')
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false)
   const [isRunningAgent, setIsRunningAgent] = useState(false)
   const [isSavingToGooglePhotos, setIsSavingToGooglePhotos] = useState(false)
+  const [googlePhotosExported, setGooglePhotosExported] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [isRequestingMic, setIsRequestingMic] = useState(false)
   const [recordingSeconds, setRecordingSeconds] = useState(0)
-  const [isDark, setIsDark] = useState(false)
   const [notice, setNotice] = useState(() =>
     oauthResult === 'connected'
       ? 'Google Photos is connected. Choose a photo to import.'
@@ -465,8 +469,19 @@ function PhotoWorkflow() {
       setWorkflowError('Sign in before saving an image to Google Photos.')
       return
     }
-    if (!selectedPhoto?.creationId) {
-      setWorkflowError('Choose a photo and save it to your private draft first.')
+    if (!selectedPhoto?.creationId || !generatedPhotoUrl) {
+      setWorkflowError('Generate and approve an image before saving it to Google Photos.')
+      return
+    }
+    if (reviewStatus !== 'approved') {
+      setWorkflowError('Approve the generated image before saving it to Google Photos.')
+      return
+    }
+    if (googlePhotosExported) {
+      setNotice('This generated image has already been saved to your Google Photos library.')
+      return
+    }
+    if (!window.confirm('Save a new copy of this approved generated image to your Google Photos library? Your original photo will not be changed.')) {
       return
     }
 
@@ -509,8 +524,8 @@ function PhotoWorkflow() {
         popup?.close()
       }
 
-      const mediaKind = generatedPhotoUrl ? 'outputImage' : 'sourceImage'
-      await saveGooglePhotosImage(selectedPhoto.creationId, mediaKind, user)
+      await saveGooglePhotosImage(selectedPhoto.creationId, 'outputImage', user)
+      setGooglePhotosExported(true)
       setNotice('The image was saved to your Google Photos library.')
     } catch (error) {
       popup?.close()
@@ -603,6 +618,9 @@ function PhotoWorkflow() {
   function clearAgentResult() {
     setGeneratedPhotoUrl('')
     setAgentResult(null)
+    setReviewStatus('pending')
+    setRevisionInstruction('')
+    setGooglePhotosExported(false)
     setWorkflowError('')
     setGeminiConsent(false)
   }
@@ -787,7 +805,7 @@ function PhotoWorkflow() {
     moveToStep(step + 1)
   }
 
-  async function createWithAgents() {
+  async function createWithAgents(instructionOverride = '') {
     if (!user) {
       setWorkflowError('Sign in before running the agents.')
       return
@@ -796,7 +814,7 @@ function PhotoWorkflow() {
       setWorkflowError('Choose a device photo or import a Google Photos image. Sample previews are not stored in your private creation.')
       return
     }
-    const instructions = prompt.trim()
+    const instructions = instructionOverride.trim() || prompt.trim()
     if (!instructions && !audioFile) {
       setWorkflowError('Enter written instructions, add a voice note, or provide both.')
       return
@@ -848,12 +866,42 @@ function PhotoWorkflow() {
       )
       setGeneratedPhotoUrl(outputUrl)
       setAgentResult(result.creation?.agentWorkflow || null)
+      setReviewStatus(result.creation?.reviewStatus || 'pending')
+      setGooglePhotosExported(false)
       setNotice('The agents completed their edits and saved the generated image to your private creation.')
     } catch (error) {
       setWorkflowError(error.message)
       setNotice('')
     } finally {
       setIsRunningAgent(false)
+    }
+  }
+
+  async function handleReviewAction(action) {
+    if (!selectedPhoto?.creationId) return
+    if (action === 'request_revision' && !revisionInstruction.trim()) {
+      setWorkflowError('Describe the one revision you want before requesting it.')
+      return
+    }
+    setIsSubmittingReview(true)
+    setWorkflowError('')
+    try {
+      const creation = await reviewCreation(
+        selectedPhoto.creationId,
+        action,
+        revisionInstruction,
+        user,
+      )
+      setReviewStatus(creation.reviewStatus)
+      setNotice(action === 'approve'
+        ? 'The generated image was approved.'
+        : action === 'reject'
+          ? 'The generated image was rejected.'
+          : 'Your one revision request is ready. Run the revision when you are ready.')
+    } catch (error) {
+      setWorkflowError(error.message)
+    } finally {
+      setIsSubmittingReview(false)
     }
   }
 
@@ -951,7 +999,7 @@ function PhotoWorkflow() {
   const selectedIsLocal = selectedPhoto?.source === 'device'
 
   return (
-    <main className={'workflow-shell' + (isDark ? ' workflow-dark' : '')}>
+    <main className="workflow-shell">
       <div className="workflow-decoration" aria-hidden="true">
         <span className="workflow-orb workflow-orb-coral" />
         <span className="workflow-orb workflow-orb-blue" />
@@ -968,15 +1016,6 @@ function PhotoWorkflow() {
 
 
         <div className="workflow-account">
-          <button
-            className="workflow-theme-button"
-            type="button"
-            onClick={() => setIsDark((value) => !value)}
-            aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-            title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
-          >
-            <Icon name="sun" size={17} />
-          </button>
           {user ? (
             <>
               <Link className="workflow-account-link" to="/account">
@@ -1205,6 +1244,8 @@ function PhotoWorkflow() {
                       setPrompt(event.target.value)
                       setGeneratedPhotoUrl('')
                       setAgentResult(null)
+                      setReviewStatus('pending')
+                      setGooglePhotosExported(false)
                     }}
                     maxLength={1000}
                     placeholder="For example: soften the afternoon light, keep the colors natural, and give it a quiet editorial feel..."
@@ -1344,29 +1385,88 @@ function PhotoWorkflow() {
                   className="workflow-primary-button"
                   type="button"
                   onClick={() => void createWithAgents()}
-                  disabled={isRunningAgent || !user || !geminiConsent || (Boolean(audioFile) && !transcript.trim())}
+                  disabled={isRunningAgent || !user || !geminiConsent || (Boolean(audioFile) && !transcript.trim()) || (Boolean(generatedPhotoUrl) && reviewStatus !== 'revision_requested')}
                   aria-busy={isRunningAgent}
                 >
                   {isRunningAgent ? 'Agents working…' : agentResult ? 'Run agents again' : 'Create with AI agents'}
                   {!isRunningAgent && <Icon name="spark" size={17} />}
                 </button>
-                <button
-                  className="workflow-secondary-button"
-                  type="button"
-                  onClick={() => void handleSaveToGooglePhotos()}
-                  disabled={isSavingToGooglePhotos || !user}
-                  aria-busy={isSavingToGooglePhotos}
-                >
-                  {isSavingToGooglePhotos ? 'Saving to Google Photos…' : 'Save to Google Photos'}
-                </button>
+                {generatedPhotoUrl && reviewStatus === 'approved' && (
+                  <button
+                    className="workflow-secondary-button"
+                    type="button"
+                    onClick={() => void handleSaveToGooglePhotos()}
+                    disabled={isSavingToGooglePhotos || !user || googlePhotosExported}
+                    aria-busy={isSavingToGooglePhotos}
+                  >
+                    {isSavingToGooglePhotos
+                      ? 'Saving to Google Photos…'
+                      : googlePhotosExported
+                        ? 'Saved to Google Photos'
+                        : 'Save approved image to Google Photos'}
+                  </button>
+                )}
                 <button className="workflow-primary-button" type="button" onClick={downloadPhoto}>
                   {generatedPhotoUrl ? 'Download generated photo' : 'Download selected photo'} <Icon name="upload" size={17} />
                 </button>
               </div>
               {agentResult && (
-                <p className="workflow-notice" role="status">
-                  Agent review completed with {agentResult.revisionCount} automated revision{agentResult.revisionCount === 1 ? '' : 's'}.
-                </p>
+                <div className="review-decision-panel">
+                  <p className="workflow-notice" role="status">
+                    Agent review completed with {agentResult.revisionCount} automated revision{agentResult.revisionCount === 1 ? '' : 's'}. Status: {reviewStatus.replace('_', ' ')}.
+                  </p>
+                  {(reviewStatus === 'pending' || reviewStatus === 'revised') && (
+                    <div className="review-decision-actions">
+                      <button
+                        className="workflow-primary-button"
+                        type="button"
+                        onClick={() => void handleReviewAction('approve')}
+                        disabled={isSubmittingReview}
+                      >
+                        Approve generated image
+                      </button>
+                      <button
+                        className="workflow-secondary-button"
+                        type="button"
+                        onClick={() => void handleReviewAction('reject')}
+                        disabled={isSubmittingReview}
+                      >
+                        Reject generated image
+                      </button>
+                      {reviewStatus === 'pending' && (
+                        <>
+                          <textarea
+                            className="workflow-textarea revision-instruction"
+                            value={revisionInstruction}
+                            onChange={(event) => setRevisionInstruction(event.target.value)}
+                            maxLength={1000}
+                            placeholder="If needed, describe the one revision you want..."
+                            rows={3}
+                            aria-label="Revision instruction"
+                          />
+                          <button
+                            className="workflow-secondary-button"
+                            type="button"
+                            onClick={() => void handleReviewAction('request_revision')}
+                            disabled={isSubmittingReview}
+                          >
+                            Request one revision
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  {reviewStatus === 'revision_requested' && (
+                    <button
+                      className="workflow-primary-button"
+                      type="button"
+                      onClick={() => void createWithAgents(revisionInstruction)}
+                      disabled={isRunningAgent}
+                    >
+                      Run requested revision
+                    </button>
+                  )}
+                </div>
               )}
               {workflowError && <p className="workflow-error" role="alert">{workflowError}</p>}
               {notice && <p className="workflow-notice" role="status">{notice}</p>}

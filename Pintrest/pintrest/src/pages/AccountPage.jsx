@@ -7,7 +7,7 @@ import { apiRequest } from '../services/api'
 import './AccountPage.css'
 
 const PAGE_SIZE = 12
-const EMPTY_FILTERS = { search: '', status: 'all', from: '', to: '' }
+const EMPTY_FILTERS = { search: '', status: 'completed', from: '', to: '' }
 
 async function addPreviewUrls(creations, user) {
   return Promise.all(creations.map(async (creation) => {
@@ -117,61 +117,60 @@ function AccountPage() {
   }
 
   const profile = profileResult.profile
-  const hasFilters = Object.values(appliedFilters).some((value) => value && value !== 'all')
+  const hasFilters = [appliedFilters.search, appliedFilters.from, appliedFilters.to].some(Boolean)
 
   return (
-    <main className="dashboard-page">
-      <div className="dashboard-container">
-        <header className="dashboard-heading">
+    <main className="account-page">
+      <div className="account-content">
+        <header className="account-intro">
           <div>
-            <p className="page-eyebrow"><span /> Pinboard Studio · Your workspace</p>
+            <p className="account-eyebrow"><span /> Pinboard Studio · User's creations</p>
             <h1>Your creative <em>library.</em></h1>
-            <p className="dashboard-intro">Keep your source images, ideas, and editing drafts together in one private workspace.</p>
+            <p className="account-intro-copy">Keep your source images, ideas, and editing drafts together in one private workspace.</p>
           </div>
-          <div className="dashboard-profile-card">
-            <span className="dashboard-profile-label">SIGNED IN AS</span>
+          <div className="account-profile-card">
+            <span className="account-profile-label">SIGNED IN AS</span>
             <strong>{profile?.displayName || user?.displayName || user?.email || 'Pinboard creator'}</strong>
             <span>{profileResult.loading ? 'Loading profile…' : profileResult.error || user?.email || 'Connected account'}</span>
-            <button type="button" onClick={() => void handleSignOut()} disabled={signingOut}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
+            <button className="account-link-button" type="button" onClick={() => void handleSignOut()} disabled={signingOut}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </div>
         </header>
 
-        {notice && <p className="dashboard-notice" role="status">{notice}</p>}
-        {profileResult.error && <p className="dashboard-error" role="alert">{profileResult.error}</p>}
+        {notice && <p className="account-notice" role="status">{notice}</p>}
+        {profileResult.error && <p className="account-error" role="alert">{profileResult.error}</p>}
 
-        <section className="dashboard-toolbar" aria-labelledby="library-filters-title">
-          <div className="dashboard-section-heading">
+        <section className="account-card account-toolbar" aria-labelledby="library-filters-title">
+          <div className="account-section-heading">
             <div>
-              <p className="dashboard-kicker">YOUR WORK</p>
+              <p className="account-kicker">YOUR WORK</p>
               <h2 id="library-filters-title">Find a creation</h2>
             </div>
-            <Link className="dashboard-primary-button" to="/">+ New creation</Link>
+            <Link className="account-primary-button" to="/">+ New creation</Link>
           </div>
           <form className="creation-filters" onSubmit={handleApplyFilters}>
             <label className="filter-search">Search<input name="search" value={filters.search} onChange={handleFilterChange} placeholder="Search instructions or creation ID" /></label>
-            <label>Status<select name="status" value={filters.status} onChange={handleFilterChange}><option value="all">All statuses</option><option value="draft">Draft</option><option value="processing">Processing</option><option value="completed">Completed</option><option value="failed">Failed</option></select></label>
             <label>From<input name="from" type="date" value={filters.from} onChange={handleFilterChange} /></label>
             <label>To<input name="to" type="date" value={filters.to} onChange={handleFilterChange} /></label>
-            <div className="filter-actions"><button className="dashboard-primary-button" type="submit">Apply</button>{hasFilters && <button className="dashboard-secondary-button" type="button" onClick={handleClearFilters}>Clear</button>}</div>
+            <div className="filter-actions"><button className="account-primary-button" type="submit">Apply</button>{hasFilters && <button className="account-secondary-button" type="button" onClick={handleClearFilters}>Clear</button>}</div>
           </form>
         </section>
 
-        <section className="dashboard-library" aria-labelledby="saved-creations-title">
-          <div className="dashboard-section-heading library-heading">
-            <div><p className="dashboard-kicker">PRIVATE LIBRARY</p><h2 id="saved-creations-title">Saved creations</h2></div>
+        <section className="account-card account-library" aria-labelledby="saved-creations-title">
+          <div className="account-section-heading library-heading">
+            <div><p className="account-kicker">PRIVATE LIBRARY</p><h2 id="saved-creations-title">Saved creations</h2></div>
             {!library.loading && <span className="library-count">{library.creations.length} loaded</span>}
           </div>
 
           {library.loading ? (
             <div className="creation-grid" aria-label="Loading creations" aria-busy="true">{[1, 2, 3].map((item) => <div className="creation-skeleton" key={item} />)}</div>
           ) : library.error && library.creations.length === 0 ? (
-            <div className="library-state" role="alert"><strong>We couldn’t load your library.</strong><p>{library.error}</p><button className="dashboard-secondary-button" type="button" onClick={() => setAppliedFilters({ ...appliedFilters })}>Try again</button></div>
+            <div className="library-state" role="alert"><strong>We couldn’t load your library.</strong><p>{library.error}</p><button className="account-secondary-button" type="button" onClick={() => setAppliedFilters({ ...appliedFilters })}>Try again</button></div>
           ) : library.creations.length === 0 ? (
-            <div className="library-state"><strong>{hasFilters ? 'No creations match those filters.' : 'Your library is ready for its first idea.'}</strong><p>{hasFilters ? 'Try a broader search or clear the filters.' : 'Upload a source image or import one from Google Photos to start a private creation.'}</p><Link className="dashboard-primary-button" to="/">Start creating</Link></div>
+            <div className="library-state"><strong>{hasFilters ? 'No creations match those filters.' : 'Your library is ready for its first idea.'}</strong><p>{hasFilters ? 'Try a broader search or clear the filters.' : 'Upload a source image or import one from Google Photos to start a private creation.'}</p><Link className="account-primary-button" to="/">Start creating</Link></div>
           ) : (
             <>
               <div className="creation-grid">{library.creations.map((creation) => <CreationCard creation={creation} key={creation.id} />)}</div>
-              {library.nextCursor && <div className="load-more-wrap"><button className="dashboard-secondary-button" type="button" onClick={() => void handleLoadMore()} disabled={loadingMore}>{loadingMore ? 'Loading more…' : 'Load more creations'}</button></div>}
+              {library.nextCursor && <div className="load-more-wrap"><button className="account-secondary-button" type="button" onClick={() => void handleLoadMore()} disabled={loadingMore}>{loadingMore ? 'Loading more…' : 'Load more creations'}</button></div>}
             </>
           )}
         </section>

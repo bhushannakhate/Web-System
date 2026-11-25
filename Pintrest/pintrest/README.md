@@ -57,6 +57,12 @@ The Project 2 API provides Firebase-authenticated profile and creation endpoints
 
 The UI obtains a fresh Firebase ID token before calling protected routes and sends it as a bearer token.
 
+After the AI workflow creates an output, the owner can approve it or request one
+revision with a revision instruction. Approval is required before the UI offers
+Google Photos export. Export asks for a separate confirmation, creates a new
+Google Photos item, never changes the selected original, and prevents accidental
+duplicate retries for the same approved creation.
+
 ### Voice transcription and Gemini consent
 
 After an audio upload is completed, the workflow can call

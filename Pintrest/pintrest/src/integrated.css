@@ -148,42 +148,36 @@ body,
 /* Retain each original information page's wording and interactions while using the new palette. */
 .about-page,
 .contact-page,
-.privacy-page,
-.customers-page {
+.privacy-page {
   color: #26374b;
 }
 
 .about-page .page-eyebrow,
 .contact-page .page-eyebrow,
-.privacy-page .page-eyebrow,
-.customers-page .page-eyebrow {
+.privacy-page .page-eyebrow {
   color: #286cd3;
 }
 
 .about-page .page-eyebrow > span,
 .contact-page .page-eyebrow > span,
-.privacy-page .page-eyebrow > span,
-.customers-page .page-eyebrow > span {
+.privacy-page .page-eyebrow > span {
   background: #ea4335;
 }
 
 .about-hero h1,
 .contact-intro h1,
-.privacy-header h1,
-.customers-heading h1 {
+.privacy-header h1 {
   color: #182638;
 }
 
 .about-hero h1 em,
 .contact-intro h1 em,
-.privacy-header h1 em,
-.customers-heading h1 em {
+.privacy-header h1 em {
   color: #286cd3;
 }
 
 .about-intro,
-.contact-intro > p:last-child,
-.customers-heading > p:last-child {
+.contact-intro > p:last-child {
   color: #69788a;
 }
 
@@ -207,14 +201,12 @@ body,
 .section-heading h2,
 .principle-card h3,
 .contact-aside h2,
-.privacy-content h2,
-.customer-card h2 {
+.privacy-content h2 {
   color: #26374b;
 }
 
 .principle-card,
-.contact-layout,
-.customer-card {
+.contact-layout {
   border-color: #dfe7f0;
   border-radius: 15px;
   background: rgba(255, 255, 255, .78);
@@ -223,7 +215,6 @@ body,
 
 .principle-number,
 .contact-aside-small span,
-.customer-kicker,
 .privacy-content a,
 .about-bottom-cta a {
   color: #286cd3;
@@ -234,8 +225,7 @@ body,
 .contact-aside-small,
 .privacy-content p,
 .privacy-content li,
-.privacy-intro,
-.customer-table td {
+.privacy-intro {
   color: #69788a;
 }
 
@@ -257,10 +247,7 @@ body,
 
 .contact-field input,
 .contact-field select,
-.contact-field textarea,
-.customer-form input:not([type='checkbox']),
-.customer-form textarea,
-.customer-form select {
+.contact-field textarea {
   border-color: #d5dfeb;
   border-radius: 9px;
   background: #fbfcfe;
@@ -269,16 +256,12 @@ body,
 
 .contact-field input:focus,
 .contact-field select:focus,
-.contact-field textarea:focus,
-.customer-form input:focus,
-.customer-form textarea:focus,
-.customer-form select:focus {
+.contact-field textarea:focus {
   border-color: #6d9de5;
   box-shadow: 0 0 0 3px rgba(40, 108, 211, .12);
 }
 
 .contact-form-footer button,
-.customer-submit,
 .about-cta {
   border-radius: 10px;
   background: #286cd3;
@@ -287,27 +270,16 @@ body,
 }
 
 .contact-form-footer button:hover,
-.customer-submit:hover,
 .about-cta:hover {
   background: #1e56ac;
   border-color: #1e56ac;
   color: #fff;
 }
 
-.customer-badge,
 .directory-empty,
 .account-summary {
   border-radius: 10px;
   background: #eef4fc;
-}
-
-.customer-consent input {
-  accent-color: #286cd3;
-}
-
-.customer-table th,
-.customer-table td {
-  border-color: #e3eaf2;
 }
 
 .auth-card,
