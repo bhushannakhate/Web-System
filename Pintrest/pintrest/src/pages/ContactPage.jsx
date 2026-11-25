@@ -13,11 +13,10 @@ function ContactPage() {
     const formData = new FormData(event.currentTarget)
     const recipients = [
       'bnakhate@horizon.csueastbay.edu',
-      'ssotomejia@horizon.csueastbay.edu',
       'rtorres32@horizon.csueastbay.edu',
     ]
     // Read fields by their HTML name attributes and assemble the email draft.
-    const subject = `Pinboard Studio contact: ${formData.get('topic')}`
+    const subject = `AI Photo Studio contact: ${formData.get('topic')}`
     const body = [
       `Name: ${formData.get('name')}`,
       `Email: ${formData.get('email')}`,
@@ -52,7 +51,6 @@ function ContactPage() {
             <span>YOUR MESSAGE GOES TO</span>
             <ul className="contact-recipient-list">
               <li>bnakhate@horizon.csueastbay.edu</li>
-              <li>ssotomejia@horizon.csueastbay.edu</li>
               <li>rtorres32@horizon.csueastbay.edu</li>
             </ul>
           </div>

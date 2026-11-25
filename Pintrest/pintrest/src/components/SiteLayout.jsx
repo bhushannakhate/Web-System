@@ -4,8 +4,6 @@ import './SiteLayout.css'
 
 function SiteLayout() {
   const { user } = useAuth()
-  const navLinkClass = ({ isActive }) => (isActive ? 'active' : undefined)
-
   return (
     <div className="site-layout workflow-shell">
       <div className="workflow-decoration" aria-hidden="true">
@@ -16,21 +14,15 @@ function SiteLayout() {
       </div>
 
       <header className="workflow-header">
-        <NavLink className="workflow-brand" to="/" aria-label="Pinboard Studio home">
-          <span className="workflow-brand-mark" aria-hidden="true">p</span>
-          <span>pinboard <small>studio</small></span>
+        <NavLink className="workflow-brand" to="/" aria-label="AI Photo Studio home">
+          <span className="workflow-brand-mark" aria-hidden="true">AI</span>
+          <span>AI Photo <small>Studio</small></span>
         </NavLink>
-
-        <nav className="workflow-nav" aria-label="Main navigation">
-          <NavLink className={navLinkClass} to="/about">About</NavLink>
-          <NavLink className={navLinkClass} to="/contact">Contact</NavLink>
-          <NavLink className={navLinkClass} to="/privacy">Privacy</NavLink>
-        </nav>
 
         <div className="workflow-account">
           {user ? (
             <>
-              <NavLink className={({ isActive }) => `workflow-text-button${isActive ? ' active' : ''}`} to="/dashboard">Library</NavLink>
+              <NavLink className={({ isActive }) => `workflow-text-button${isActive ? ' active' : ''}`} to="/account">Library</NavLink>
               <NavLink className={({ isActive }) => `workflow-text-button${isActive ? ' active' : ''}`} to="/account">Account</NavLink>
             </>
           ) : (
@@ -51,7 +43,7 @@ function SiteLayout() {
           <NavLink to="/contact">Contact</NavLink>
           <NavLink to="/privacy">Privacy</NavLink>
         </nav>
-        <p className="footer-copyright">© {new Date().getFullYear()} Pinboard Studio</p>
+        <p className="footer-copyright">© {new Date().getFullYear()} AI Photo Studio</p>
       </footer>
     </div>
   )

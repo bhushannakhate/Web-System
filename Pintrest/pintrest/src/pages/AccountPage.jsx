@@ -124,13 +124,13 @@ function AccountPage() {
       <div className="account-content">
         <header className="account-intro">
           <div>
-            <p className="account-eyebrow"><span /> Pinboard Studio · User's creations</p>
+            <p className="account-eyebrow"><span /> AI Photo Studio · User's creations</p>
             <h1>Your creative <em>library.</em></h1>
             <p className="account-intro-copy">Keep your source images, ideas, and editing drafts together in one private workspace.</p>
           </div>
           <div className="account-profile-card">
             <span className="account-profile-label">SIGNED IN AS</span>
-            <strong>{profile?.displayName || user?.displayName || user?.email || 'Pinboard creator'}</strong>
+            <strong>{profile?.displayName || user?.displayName || user?.email || 'AI Photo Studio creator'}</strong>
             <span>{profileResult.loading ? 'Loading profile…' : profileResult.error || user?.email || 'Connected account'}</span>
             <button className="account-link-button" type="button" onClick={() => void handleSignOut()} disabled={signingOut}>{signingOut ? 'Signing out…' : 'Sign out'}</button>
           </div>
@@ -148,7 +148,7 @@ function AccountPage() {
             <Link className="account-primary-button" to="/">+ New creation</Link>
           </div>
           <form className="creation-filters" onSubmit={handleApplyFilters}>
-            <label className="filter-search">Search<input name="search" value={filters.search} onChange={handleFilterChange} placeholder="Search instructions or creation ID" /></label>
+            <label className="filter-search">Search<input name="search" value={filters.search} onChange={handleFilterChange} placeholder="Search previous creations" /></label>
             <label>From<input name="from" type="date" value={filters.from} onChange={handleFilterChange} /></label>
             <label>To<input name="to" type="date" value={filters.to} onChange={handleFilterChange} /></label>
             <div className="filter-actions"><button className="account-primary-button" type="submit">Apply</button>{hasFilters && <button className="account-secondary-button" type="button" onClick={handleClearFilters}>Clear</button>}</div>

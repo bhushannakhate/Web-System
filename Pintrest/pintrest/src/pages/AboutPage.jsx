@@ -30,7 +30,7 @@ function AboutPage() {
         <div className="about-hero-copy col-12 col-md-6">
           <p className="page-eyebrow"><span /> A little about us</p>
           <h1 id="about-title">Good ideas deserve <em>a place to grow.</em></h1>
-          <p className="about-intro">Pinboard Studio is a simple creative space for shaping visual ideas. Start with an image, add your direction, and make room for what comes next.</p>
+          <p className="about-intro">AI Photo Studio is a simple creative space for shaping visual ideas. Start with an image, add your direction, and make room for what comes next.</p>
           {/* Bootstrap button classes provide the base button appearance; about CSS customizes it. */}
           <Link className="about-cta btn btn-dark" to="/">Explore the studio <span aria-hidden="true">↗</span></Link>
         </div>
